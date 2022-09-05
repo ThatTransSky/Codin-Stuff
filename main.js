@@ -36,12 +36,6 @@ for (const file of eventFiles) {
   }
 }
 
-let bot = {
-  client,
-  prefix: "-",
-  owners: ["232936279384260609"]
-}
-
 client.on("messageCreate", msg => {
     // msg.content is the content of the message
     // msg.content.toLowerCase() is the content of the message but switched to lower case so you won't have to do ["Hi", "hI", "HI", "hi"]
