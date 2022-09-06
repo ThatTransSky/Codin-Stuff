@@ -6,7 +6,7 @@ require("dotenv").config()
 module.exports = {
     name: "ready",
     once: true,
-    execute (client) {
+    execute (client, commands) {
         //When bot loads
         console.log(`Logged in as ${client.user.tag}!`)
         

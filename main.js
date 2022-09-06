@@ -13,7 +13,8 @@ const client = new Client({
 require('dotenv/config')
 
 let bot = {
-  client
+  client,
+  owners: ["232936279384260609"]
 }
 
 const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"))
