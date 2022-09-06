@@ -1,18 +1,18 @@
 const { REST } = require("@discordjs/rest")
 const { Routes } = require("discord-api-types/v9")
-const { Collection } = require("discord.js")
+// const { Collection } = require("discord.js")
 require("dotenv").config()
 
 module.exports = {
     name: "ready",
     once: true,
-    execute (client, bot) {
+    execute (client) {
         //When bot loads
         console.log(`Logged in as ${client.user.tag}!`)
-
-        /* Still working on this but it's disabled for now.
         
         const CLIENT_ID = process.env.CLIENT_ID
+
+        /* Still working on this but it's disabled for now.
         
         client.slashcommands = new Collection()
 
