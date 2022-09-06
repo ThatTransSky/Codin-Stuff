@@ -38,7 +38,7 @@ async execute(interaction) {
                 content: "**Amount has to be a number!**",
                 ephemeral: true,
             })
-        } else if (!0 < Amount < 100) {
+        } else if (!(0 < Amount < 100)) {
             return interaction.reply({
                 content: "**Please use a number between 1-99!**",
                 ephemeral: true,
