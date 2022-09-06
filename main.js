@@ -12,6 +12,10 @@ const client = new Client({
   });
 require('dotenv/config')
 
+let bot = {
+  client
+}
+
 const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"))
 
 const commands = []
@@ -24,26 +28,17 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command)
 }
 
+
 const eventFiles = fs.readdirSync("./events").filter(file => file.endsWith(".js"));
 
 for (const file of eventFiles) {
   const event = require(`./events/${file}`)
 
   if (event.once) {
-    client.once(event.name, (...args) => event.execute(...args, commands))
+    client.once(event.name, (...args) => event.execute(...args, commands))// Runs the "run-once" events.
   } else {
-    client.on(event.name, (...args) => event.execute(...args, commands))
+    client.on(event.name, (...args) => event.execute(...args, commands))// Runs the rest of the events.
   }
 }
-
-client.on("messageCreate", msg => {
-    // msg.content is the content of the message
-    // msg.content.toLowerCase() is the content of the message but switched to lower case so you won't have to do ["Hi", "hI", "HI", "hi"]
-
-    if (msg.content.toLowerCase() === 'hi') {
-        // msg.reply replies to the message
-        msg.reply(`Hello my name is @${client.user.tag}`) // Says "Hello my name is " and then the username of the bot
-    }
-})
 
 client.login(process.env.TOKEN)
