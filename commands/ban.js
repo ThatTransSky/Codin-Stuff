@@ -54,7 +54,7 @@ module.exports = {
                 reason = "No reason provided." // If the reason was empty, replace it with "No reason provided."
             }
 
-            await interaction.guild.bans.create(specifiedUser.id, [deleteMessageSeconds, reason]).catch(error => {
+            await specifiedUser.ban([deleteMessageSeconds, reason]).catch(error => {
                 // console.log(error.code)
 				if (error.code == 50013) {
 					if (!specifiedUser.manageable) {
