@@ -13,8 +13,7 @@ const client = new Client({
 require('dotenv/config')
 
 let bot = {
-  client,
-  owners: ["232936279384260609"]
+  client
 }
 
 const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"))
@@ -29,6 +28,8 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command)
 }
 
+// console.log(client.commands.get("ping"));
+
 
 const eventFiles = fs.readdirSync("./events").filter(file => file.endsWith(".js"));
 
@@ -38,7 +39,7 @@ for (const file of eventFiles) {
   if (event.once) {
     client.once(event.name, (...args) => event.execute(...args, commands))// Runs the "run-once" events.
   } else {
-    client.on(event.name, (...args) => event.execute(...args, commands))// Runs the rest of the events.
+    client.on(event.name, (...args) => event.execute(...args, client))// Runs the rest of the events.
   }
 }
 

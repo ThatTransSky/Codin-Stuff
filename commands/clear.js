@@ -1,10 +1,11 @@
 const { SlashCommandBuilder } = require("@discordjs/builders")
-const { MessageEmbed, Permissions } = require("discord.js")
-let requiredPermission = "MANAGE_MESSAGES"
+
+//let requiredPermission = "MANAGE_MESSAGES"
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("clear")
     .setDescription("Clears the entire chat. Use with caution!")
+    .setDefaultMemberPermissions(0x0000000000002000) // MANAGE_MEMBERS
     .addIntegerOption((option) => {
         return option
         .setName("amount")
@@ -12,9 +13,10 @@ module.exports = {
         .setRequired(true)
     }),
 async execute(interaction) {
-    const memberPermissions = interaction.member.permissions
-    const appPermissions = interaction.appPermissions
+    //const memberPermissions = interaction.member.permissions
+    //const appPermissions = interaction.appPermissions
     try {
+/*
         console.log(memberPermissions.has(requiredPermission))
         console.log(appPermissions.has(requiredPermission))
         if(!memberPermissions.has(requiredPermission)) {
@@ -30,7 +32,7 @@ async execute(interaction) {
                 content: "I don't have the required permissions to use this.",
                 ephemeral: true,
             })}
-
+*/
         const Amount = interaction.options.getInteger("amount")
         console.log(isNaN(Amount) || Amount == null);
         if (isNaN(Amount)){
@@ -52,6 +54,7 @@ async execute(interaction) {
         })
     } catch (err) {
         console.error(err);
+        return
     }
 
     } 
