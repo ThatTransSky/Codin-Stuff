@@ -12,11 +12,13 @@ const client = new Client({
   });
 require('dotenv/config')
 
-let bot = {
-  client
-}
+/* 
+TODO: Put the command collection and event handler in separate files to tidy up the code
+*/
 
-const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js"))
+// Command Collection
+
+const commandFiles = fs.readdirSync("./commands").filter(file => file.endsWith(".js")) 
 
 const commands = []
 
@@ -28,19 +30,18 @@ for (const file of commandFiles) {
   client.commands.set(command.data.name, command)
 }
 
-// console.log(client.commands.get("ping"));
+// Event Handler
 
-
-const eventFiles = fs.readdirSync("./events").filter(file => file.endsWith(".js"));
+const eventFiles = fs.readdirSync("./events").filter(file => file.endsWith(".js"))
 
 for (const file of eventFiles) {
   const event = require(`./events/${file}`)
 
   if (event.once) {
-    client.once(event.name, (...args) => event.execute(...args, commands))// Runs the "run-once" events.
+    client.once(event.name, (...args) => event.execute(...args, commands)) // Runs the "run-once" events.
   } else {
-    client.on(event.name, (...args) => event.execute(...args, client))// Runs the rest of the events.
+    client.on(event.name, (...args) => event.execute(...args, client)) // Runs the rest of the events.
   }
 }
 
-client.login(process.env.TOKEN)
+client.login(process.env.TOKEN) // Logs in using the bot's token (which is top secret 🤫)

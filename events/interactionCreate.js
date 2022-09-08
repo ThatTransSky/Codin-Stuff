@@ -1,16 +1,20 @@
+/*
+Event Name: "interactionCreate"
+Event Triggers: When a user interacts with the bot vis /commands, buttons, menus, etc.
+Once: No
+Event Arguments:
+- Interaction: Information about the interaction that initiated this event.
+- Client: The bot's client instance.
+*/
 module.exports = {
     name: "interactionCreate",
     async execute (interaction, client) {
-        // console.log(client.commands);
-        // const { client } = bot
-        // interaction = arguments[0]
-        // client = arguments[1]
         if (!interaction.isCommand()) {return}
         
         const command = client.commands.get(interaction.commandName)
         if (!command) return; //not really used
 
-        if (command.perms && !interaction.member.permissions.has(command.perms)){
+        if (command.perms && !interaction.member.permissions.has(command.perms)){ // Rarely Used since Discord blocks /commands for users who don't have the required permissions.
             return interaction.reply({
                 content: `You do not have the required permission! (Missing Permission: ${command.perms})`,
                 ephemeral: true,

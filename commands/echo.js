@@ -1,5 +1,11 @@
 const { SlashCommandBuilder } = require("@discordjs/builders")
-
+/* 
+Command Name: "echo"
+Command Purpose: Receive a message and relay it back to the user.
+Command Options (if any):
+- Message (String Option, Required)
+Checks (if any): None (Might add one in the future to sterialize the string, if that's a threat.)
+*/
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("echo")
