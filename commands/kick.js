@@ -30,7 +30,7 @@ module.exports = {
     }),
     async execute(interaction) { // Executes the command.
         try {
-            const { client } = interaction.client
+            const client = interaction.client
             // Funnels the provided aguments into variables.
             let specifiedUser = interaction.options.getUser("user")
             const specifiedGuildMember = await interaction.guild.members.fetch(specifiedUser).catch(error => {})

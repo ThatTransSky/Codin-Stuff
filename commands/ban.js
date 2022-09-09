@@ -67,7 +67,7 @@ module.exports = {
             }
             try {
                 // If the triggering user is higher in the hierarcy than the specified user, end and notify the user.s
-	            if (interaction.member.roles.highest.comparePositionTo(specifiedGuildMemeber.roles.highest) >= 0) {
+	            if (interaction.member.roles.highest.comparePositionTo(specifiedGuildMemeber.roles.highest) <= 0) {
 	                console.log(`${interaction.user.tag} has insufficent permissions to kick ${specifiedUser.tag}. (DiscordAPIError: MissionPermissions)`)
 	                return interaction.reply({
 	                    content: `The user ${specifiedUser} is at a higher (or equals) role than you and 
