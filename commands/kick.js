@@ -8,6 +8,7 @@ Command Options (if any):
 Required Permissions: BAN_MEMBERS (1 << 2)
 Checks (if any): 
 - Is the specified user not the same as the triggering user?
+- Is the specified user not the same as the bot?
 - Is the specified user not higher in roles then the triggering user?
 - Is the specified user not higher in roles than the bot?
 */
@@ -29,9 +30,12 @@ module.exports = {
     }),
     async execute(interaction) { // Executes the command.
         try {
+            const { client } = interaction.client
             // Funnels the provided aguments into variables.
             let specifiedUser = interaction.options.getUser("user")
-            const guildMember = await interaction.guild.members.fetch(specifiedUser).catch(error => {})
+            const specifiedGuildMember = await interaction.guild.members.fetch(specifiedUser).catch(error => {})
+            // The .catch ^here^ is implemented to prevent the bot from crashing.
+            // We don't need to handle the error at the moment cause it will be addressed later on in the code.
             let reason = interaction.options.getString("reason", false)
 
             if (interaction.user.equals(specifiedUser)) { // If the specified user = the triggering user, end and notify the user.
@@ -39,14 +43,14 @@ module.exports = {
                     content: "You can't kick yourself!",
                     ephemeral: true,
                 })
-            } else if (interaction.client.user.equals(specifiedUser)) {
+            } else if (client.user.equals(specifiedUser)) {
                 return interaction.reply({
                     content: "...*I'm sure you didn't mean that*...",
                     ephemeral: true,
                 })
             }
             try {
-                if (interaction.member.roles.highest.comparePositionTo(guildMember.roles.highest) <= 0) { // If the triggering user is higher in the hierarcy than the specified user, end and notify thg
+                if (interaction.member.roles.highest.comparePositionTo(specifiedGuildMember.roles.highest) <= 0) { // If the triggering user is higher in the hierarcy than the specified user, end and notify thg
                     console.log(`${interaction.user.tag} has insufficent permissions to kick ${specifiedUser.tag}. (DiscordAPIError: MissionPermissions)`)
                         return interaction.reply({
                             content: `The user ${specifiedUser} is at a higher (or equals) role than you and cannot be kicked by you.`,
@@ -54,7 +58,7 @@ module.exports = {
                     })
                 }
             } catch (error) {
-                console.error("Couldn't check roles hierarcy, User isn't in the guild.");
+                console.error("Couldn't check roles hierarcy, User isn't in the guild."); // Returning here is required because Discord.JS can't kick someone that isn't in the guild (unlike banning).
                 return interaction.reply({
                     content: "The User isn't currently in the Server.",
                     ephemeral: true,
@@ -64,7 +68,7 @@ module.exports = {
                 reason = "No reason provided." // If the reason was empty, replace it with "No reason provided."
             }
 
-            await guildMember.kick(reason)
+            await specifiedGuildMember.kick(reason)
             .catch(error => { // Kicks the specified user with the given reason (if any) and catch if there's an error.
                 // console.log(error.code)
 				if (error.code == 50013) { // if the error was "DiscordAPIError: Missing Permissions",
@@ -77,11 +81,10 @@ module.exports = {
 						})
 					}
 			    } else {
-                    console.log(`${error.name}: ${error.message}
-                    code: ${error.code}`)
+                    console.log(error.message)
                     return interaction.reply({
-                        content: `An unhandled error has occurred. (${error.message})`,
-                        ephemeral: true,
+                    content: `An unhandled error has occurred. Please let my creator know! (${client.users.fetch(process.env.CREATOR_ID)}) (Error message: ${error.message}))`,
+                    ephemeral: true,
                     })
                 }
                 return
@@ -90,7 +93,8 @@ module.exports = {
                 console.log(`The user ${interaction.user.tag}(id: ${interaction.user.id}) has successfully kicked ${specifiedUser.tag}(id: ${specifiedUser.id}) from ${interaction.guild.name}(id: ${interaction.guild.id}).`)
                 return interaction.reply({
                     content: `The user ${specifiedUser} has been kicked for: ${reason}`
-            }).catch(error => console.log(error))}
+                })
+            }
             } catch (err) {
                 console.log(err);
             }

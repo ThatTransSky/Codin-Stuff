@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require("@discordjs/builders")
-/* 
+
+/*
 Command Name: "clear"
 Command purpose: Clears messages in a channel with a specified amount.
 Command Options:
@@ -27,7 +28,7 @@ module.exports = {
 async execute(interaction) { // Executes the command.
     try {
         // Old command permission checking (both user & bot)
-/*
+        /*
         const memberPermissions = interaction.member.permissions
         const appPermissions = interaction.appPermissions
         console.log(memberPermissions.has(requiredPermission))
@@ -45,7 +46,8 @@ async execute(interaction) { // Executes the command.
                 content: "I don't have the required permissions to use this.",
                 ephemeral: true,
             })}
-*/
+        */
+        // Funnels the provided aguments into variables.
         const Amount = interaction.options.getInteger("amount")
         if (isNaN(Amount) || (Amount % 1) != 0){ // If you get this response, let me know on discord (ItsLegend#9697).
             return interaction.reply({
@@ -64,10 +66,10 @@ async execute(interaction) { // Executes the command.
             content: `Successfully deleted ${size} messages!`,
             ephemeral: true,
         }).catch(error => { // This is here incase there are any unhandled errors. It is to prevent the bot from crashing by an error.
-            console.log(error)
+            console.log(error.message)
             return interaction.reply({
-                content: `Oops! There's been an error clearing the messages. That's a bit unexpected. Can you contact my creator (ItsLegend#9697) with this error code? (Error Code: ${error.code}`,
-                ephemeral: true,
+            content: `An unhandled error has occurred. Please let my creator know! (${client.users.fetch(process.env.CREATOR_ID)}) (Error message: ${error.message}))`,
+            ephemeral: true,
             })
         })
     } catch (err) {

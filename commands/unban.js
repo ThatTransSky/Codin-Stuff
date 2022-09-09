@@ -29,7 +29,10 @@ module.exports = {
     }),
     async execute(interaction) {
         try {
-            const user = await interaction.client.users.fetch(interaction.options.getString("user_id")) // This could very easily be replaced with getUser and let Discord handle the error.
+            // Funnels the provided aguments into variables.
+            const client = interaction.client
+            const user = await client.users.fetch(interaction.options.getString("user_id"))
+            // ^This^ could very easily be replaced with getUser and let Discord handle the error.
             .catch(error => {
                 console.log(error.message)
                 if (error.message.includes(`Invalid Form Body`)) { // If the User ID is invalid
@@ -43,9 +46,10 @@ module.exports = {
                         ephemeral: true,
                     })
                 } else {
-                    return interaction.reply({ // Anything else
-                        content: `An unhandled error has occurred. (Error Message: ${error.message})`,
-                        ephemeral: true,
+                    console.log(error.message)
+                    return interaction.reply({
+                    content: `An unhandled error has occurred. Please let my creator know! (${client.users.fetch(process.env.CREATOR_ID)}) (Error message: ${error.message}))`,
+                    ephemeral: true,
                     })
                 }
             })
@@ -62,18 +66,18 @@ module.exports = {
                     content: "The User ID provided is not a valid ID.",
                     ephemeral: true,
                 })
-            } else if ((typeof interaction.client.users.fetch(`${user_id}`)) === undefined) {
+            } else if ((typeof client.users.fetch(`${user_id}`)) === undefined) {
                 return interaction.reply({
                     content: "The User ID provided doesn't exist.",
                     ephemeral: true,
                 })
             */
-            if (interaction.user.id === user.id) {
+            if (interaction.user.id === user.id) { // If the specified user = triggering user, end and notify the user.
                 return interaction.reply({
                     content: "The user provided isn't--- Wait... You didn't really just try to unban yourself? *sigh* :person_facepalming:",
                     ephemeral: true,
                 })
-            } else if (interaction.client.user.id === user.id) {
+            } else if (client.user.id === user.id) { // You're talking to bot, why did you think the bot's banned?
                 return interaction.reply({
                     content: "Hello? I'm- I'm right here. I'm not banned, am I?",
                     ephemeral: true,

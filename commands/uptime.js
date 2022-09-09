@@ -9,8 +9,9 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName("uptime")
     .setDescription("Shows how long have the bot been online for."),
-    async execute(interaction, client) {
+    async execute(interaction) {
         // Conversion to higher units of time.
+        const client = interaction.client
         let uptimeMilliseconds = client.uptime
         let uptimeSeconds = Math.trunc(uptimeMilliseconds / 1000)
         let uptimeMinutes = Math.trunc(uptimeSeconds / 60)
@@ -27,7 +28,7 @@ module.exports = {
         }).catch(error => {
             console.log(error)
             return interaction.reply({
-                content: `Something went wrong. (Error code: ${error.code})`,
+                content: `An unhandled error has occurred. Please let my creator know! (${client.users.fetch(process.env.CREATOR_ID)}) (Error code: ${error.code})`,
                 ephemeral: true,
             })
         })

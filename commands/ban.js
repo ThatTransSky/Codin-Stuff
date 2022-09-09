@@ -9,9 +9,10 @@ Command Options (if any):
 Required Permissions: BAN_MEMBERS (1 << 2)
 Checks (if any): 
 - Is the specified user not the same as the triggering user?
+- Is the specified user not the same as the bot?
+- Is the specified amount of days higher than the limit (7)?
 - Is the specified user not higher in roles then the triggering user?
 - Is the specified user not higher in roles than the bot?
-- Is the specified amount of days higher than the limit (7)?
  */
 module.exports = {
     data: new SlashCommandBuilder()
@@ -37,7 +38,11 @@ module.exports = {
     async execute(interaction) { // Executes the command.
         try {
             // Funnels the provided aguments into variables.
+            const client = interaction.client
             const specifiedUser = interaction.options.getUser("user")
+            const specifiedGuildMemeber = await interaction.guild.members.fetch(specifiedUser).catch(error => {})
+            // The .catch ^here^ is implemented to prevent the bot from crashing.
+            // We don't need to handle the error at the moment cause it will be addressed later on in the code.
             let reason = interaction.options.getString("reason", false)
             const guildBans = interaction.guild.bans
             const deleteMessageSeconds = 24*60*60*(interaction.options.getInteger("delete_messages", false)) // Convert days to seconds. Required by Discord's API.
@@ -47,23 +52,10 @@ module.exports = {
                     content: "You can't ban yourself!",
                     ephemeral: true,
                 })
-            } else if (interaction.client.user.equals(specifiedUser)) { // How dare you target the bot?
-                await interaction.reply({
-                    content: "...Sure thing boss...",
+            } else if (client.user.equals(specifiedUser)) { // How dare you target the bot?
+                return await interaction.reply({
+                    content: "Did... did you just try to ban me using my command? Sorry to let you down but that's not how it works, I can't ban myself.",
                     ephemeral: true,
-                })
-                await new Promise(r => setTimeout(r, 3000))
-                await guildBans.create(specifiedUser, {days: null, deleteMessageSeconds: deleteMessageSeconds, reason: reason}) // Fortunately, Discord won't let that happen because of the role hierarcy. You monster.
-                .catch(error => {
-                    return interaction.editReply("Sorry boss, Discord won't let me...");
-                })
-                return;
-            } else if (interaction.user.roles.highest.comparePositionTo(specifiedUser.roles.highest) >= 0) { // If the triggering user is higher in the hierarcy than the specified user, end and notify the user.
-                console.log(`${interaction.user.tag} has insufficent permissions to kick ${specifiedUser.tag}. (DiscordAPIError: MissionPermissions)`)
-                return interaction.reply({
-                content: `The user ${specifiedUser} is at a higher (or equals) role than you and 
-                cannot be banned by you.`,
-                ephemeral: true,
                 })
             } else if (deleteMessageSeconds > 604800) { // If the number of days are above the limit (7 or, in seconds, 607800),
                                                         // end and notify the user.
@@ -73,7 +65,20 @@ module.exports = {
                     ephemeral: true,
                 })
             }
-
+            try {
+                // If the triggering user is higher in the hierarcy than the specified user, end and notify the user.s
+	            if (interaction.member.roles.highest.comparePositionTo(specifiedGuildMemeber.roles.highest) >= 0) {
+	                console.log(`${interaction.user.tag} has insufficent permissions to kick ${specifiedUser.tag}. (DiscordAPIError: MissionPermissions)`)
+	                return interaction.reply({
+	                    content: `The user ${specifiedUser} is at a higher (or equals) role than you and 
+	                    cannot be banned by you.`,
+	                    ephemeral: true,
+	                })
+	            }
+            } catch (error) {
+                // No need to return here since it is possible to create a ban for a user that isn't in the guild (unlike kicking).
+                console.error("Couldn't check roles hierarcy, User isn't in the Guild.")
+            }
             if (reason == null) {
                 reason = "No reason provided." // If the reason was empty, replace it with "No reason provided."
             }
@@ -89,11 +94,10 @@ module.exports = {
 							Are you trying to ban a staff member?`,
 							ephemeral: true,
 						})
-					} else { // if the bot somehow gave you this response, please let me know on discord (ItsLegend#9697). I am geniuenly curious how you got here.
-						console.log(`${interaction.user.tag} has insufficent permissions to ban ${specifiedUser.tag}. (DiscordAPIError: MissionPermissions)`)
+					} else { 
+						console.log(`Unhandled Error. Error message: ${error.message}`)
                 		return interaction.reply({
-                    	content: `The user ${specifiedUser} is at a higher role than you and 
-						cannot be banned by you.`,
+                    	content: `An unhandled error has occurred, please let my creator know (${interaction})`,
                     	ephemeral: true,
 						})
 					}
