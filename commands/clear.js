@@ -6,9 +6,9 @@ Command Options:
 - Amount (Integer Option, Required)
 Required Permissions: MANAGE_MESSAGES (1 << 13)
 Checks (if any):
-- If the amount is a number (deprecated since the option is Integer only).
-- If the amount is between 1-99 (99 is the limit with BulkDeletion)
-Note: If the command deletion returns an unhandled error,
+- Is the amount an Integer? (deprecated since the option is Integer only but I'm paranoid so ¯\_(ツ)_/¯).
+- Is the amount between 1-99? (99 is the limit with BulkDeletion)
+Note: If the message deletion returns an unhandled error,
       I let the user know to contact me with that error code
       so I can see what went wrong and update the code.
 */
@@ -47,9 +47,9 @@ async execute(interaction) { // Executes the command.
             })}
 */
         const Amount = interaction.options.getInteger("amount")
-        if (isNaN(Amount)){ // If you get this response, let me know on discord (ItsLegend#9697).
+        if (isNaN(Amount) || (Amount % 1) != 0){ // If you get this response, let me know on discord (ItsLegend#9697).
             return interaction.reply({
-                content: "**Amount has to be a number!**",
+                content: "**Amount has to be an Integer!**",
                 ephemeral: true,
             })
         } else if (!(0 < Amount < 100)) { // If the number is below 1 or above 99, end and notify the user.

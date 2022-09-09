@@ -103,5 +103,3 @@ dist
 # TernJS port file
 .tern-port
 
-# Old main.js script
-main-copy.js

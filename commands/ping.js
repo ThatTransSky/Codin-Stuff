@@ -14,7 +14,6 @@ module.exports = {
         //console.log(interaction)
         interaction.reply({
             content: "Pong!",
-            ephemeral: true,
         })
     }
 }
