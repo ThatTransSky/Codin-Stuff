@@ -3,8 +3,9 @@ const { SlashCommandBuilder } = require("@discordjs/builders")
 Command Name: "unban"
 Command Purpose: Revokes a user ban.
 Command Options (if any):
-- User_ID (String [cus discord is stupid] Option, Required)
+- User_ID (User [cus discord is ̶s̶t̶u̶p̶i̶d̶  smart] Option, Required)
 - Reason (String Option, Default: No reason provided.)
+Required Permissions: BAN_MEMBERS (1 << 2)
 Checks (if any):
 - Is the User ID provided is valid and exists?
 - Is the User ID provided the same as the Triggering User's ID?
@@ -16,74 +17,50 @@ module.exports = {
     .setName("unban") // Sets the name
     .setDescription("Revokes a user ban.") // Sets the description
     .setDefaultMemberPermissions(1 << 2) // Sets the required permissions (BAN_MEMBERS)
-    .addStringOption((option) => { 
+    .addUserOption((option) => { 
         return option
         .setName("user_id")
         .setDescription("Enter the User's ID.")
         .setRequired(true)
     })
-    .addStringOption((option) => {
+    .addUserOption((option) => {
         return option
         .setName("reason")
         .setDescription("The Reason for Unbanning.")
     }),
     async execute(interaction) {
         try {
-            // Funnels the provided aguments into variables.
-            const client = interaction.client
-            const user = await client.users.fetch(interaction.options.getString("user_id"))
-            // ^This^ could very easily be replaced with getUser and let Discord handle the error.
+            const {client} = interaction
+            // Funnels the provided options into variables.
+            const specifiedUser = await client.users.fetch(interaction.options.getUser("user_id"))
+            // ̶^̶T̶h̶i̶s̶^̶ ̶c̶o̶u̶l̶d̶ ̶v̶e̶r̶y̶ ̶e̶a̶s̶i̶l̶y̶ ̶b̶e̶ ̶r̶e̶p̶l̶a̶c̶e̶d̶ ̶w̶i̶t̶h̶ ̶g̶e̶t̶U̶s̶e̶r̶ ̶a̶n̶d̶ ̶l̶e̶t̶ ̶D̶i̶s̶c̶o̶r̶d̶ ̶h̶a̶n̶d̶l̶e̶ ̶t̶h̶e̶ ̶e̶r̶r̶o̶r̶.̶  Done.
             .catch(error => {
                 console.log(error.message)
-                if (error.message.includes(`Invalid Form Body`)) { // If the User ID is invalid
-                    return interaction.reply({
-                        content: `The User ID provided is invalid. (Error Message: ${error.message})`,
-                        ephemeral: true,
-                    })
-                } else if (error.message.includes("Unknown User")) { // If the User ID doesn't exist
-                    return interaction.reply({
-                        content: `The User ID provided doesn't exist. (Error Message: ${error.message})`,
-                        ephemeral: true,
-                    })
-                } else {
-                    console.log(error.message)
-                    return interaction.reply({
-                    content: `An unhandled error has occurred. Please let my creator know! (${client.users.fetch(process.env.CREATOR_ID)}) (Error message: ${error.message}))`,
-                    ephemeral: true,
-                    })
-                }
+                return interaction.reply({
+                content: `An unhandled error has occurred. Please let my creator know! (${client.users.fetch(process.env.CREATOR_ID)}) (Error message: ${error.message}))`,
+                ephemeral: true,
+                })
             })
             let reason = interaction.options.getString("reason", false)
-            const guildBans = interaction.guild.bans
+            const guildBans = await interaction.guild.bans
     
             if (reason == null) {
                 reason = "No reason provided."
             }
-            // Not needed since the fetch() method basically checks both of these for me :3
-            /*
-            if (isNaN(user_id) || (user_id % 1) != 0) {
-                return interaction.reply({
-                    content: "The User ID provided is not a valid ID.",
-                    ephemeral: true,
-                })
-            } else if ((typeof client.users.fetch(`${user_id}`)) === undefined) {
-                return interaction.reply({
-                    content: "The User ID provided doesn't exist.",
-                    ephemeral: true,
-                })
-            */
-            if (interaction.user.id === user.id) { // If the specified user = triggering user, end and notify the user.
+            
+            if (interaction.user.id === specifiedUser.id) { // If the specified user = triggering user, end and notify the user.
                 return interaction.reply({
                     content: "The user provided isn't--- Wait... You didn't really just try to unban yourself? *sigh* :person_facepalming:",
                     ephemeral: true,
                 })
-            } else if (client.user.id === user.id) { // You're talking to bot, why did you think the bot's banned?
+            } else if (client.user.id === specifiedUser.id) { // You're talking to the bot, why did you think the bot's banned?
                 return interaction.reply({
                     content: "Hello? I'm- I'm right here. I'm not banned, am I?",
                     ephemeral: true,
                 })
             } else {
-                await guildBans.remove(user, reason)
+                await guildBans.remove(specifiedUser, reason)
+                // If the unban errors here, it is most likely due to the user never having a ban.
                 .catch(error => {
                     console.log(error.message)
                     return interaction.reply({
@@ -93,9 +70,9 @@ module.exports = {
                 })
             }
             if (!interaction.replied) {
-                console.log(`Successfully unbanned ${user.username} from ${interaction.guild.name}`)
+                console.log(`Successfully unbanned ${specifiedUser.tag} from ${interaction.guild.name}`)
                 return interaction.reply({
-                    content: `Successfully unbanned ${user.username}! :partying_face:`
+                    content: `Successfully unbanned ${specifiedUser}! :partying_face:`
                 })
             }
         } catch (error) {

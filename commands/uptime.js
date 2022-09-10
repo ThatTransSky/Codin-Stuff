@@ -11,7 +11,7 @@ module.exports = {
     .setDescription("Shows how long have the bot been online for."),
     async execute(interaction) {
         // Conversion to higher units of time.
-        const client = interaction.client
+        const {client} = interaction
         let uptimeMilliseconds = client.uptime
         let uptimeSeconds = Math.trunc(uptimeMilliseconds / 1000)
         let uptimeMinutes = Math.trunc(uptimeSeconds / 60)

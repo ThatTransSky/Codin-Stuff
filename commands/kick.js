@@ -30,10 +30,12 @@ module.exports = {
     }),
     async execute(interaction) { // Executes the command.
         try {
-            const client = interaction.client
-            // Funnels the provided aguments into variables.
+            // Necessary constants
+            const {client} = interaction
+            const guildMembers = interaction.guild.members
+            // Funnels the provided options into variables.
             let specifiedUser = interaction.options.getUser("user")
-            const specifiedGuildMember = await interaction.guild.members.fetch(specifiedUser).catch(error => {})
+            const specifiedGuildMember = await guildMembers.fetch(specifiedUser).catch(error => {})
             // The .catch ^here^ is implemented to prevent the bot from crashing.
             // We don't need to handle the error at the moment cause it will be addressed later on in the code.
             let reason = interaction.options.getString("reason", false)
@@ -50,6 +52,7 @@ module.exports = {
                 })
             }
             try {
+                // If the specfied user is higher in the hierarcy than the triggering user, end and notify the user.
                 if (interaction.member.roles.highest.comparePositionTo(specifiedGuildMember.roles.highest) <= 0) { // If the triggering user is higher in the hierarcy than the specified user, end and notify thg
                     console.log(`${interaction.user.tag} has insufficent permissions to kick ${specifiedUser.tag}. (DiscordAPIError: MissionPermissions)`)
                         return interaction.reply({
@@ -60,7 +63,7 @@ module.exports = {
             } catch (error) {
                 console.error("Couldn't check roles hierarcy, User isn't in the guild."); // Returning here is required because Discord.JS can't kick someone that isn't in the guild (unlike banning).
                 return interaction.reply({
-                    content: "The User isn't currently in the Server.",
+                    content: "The User is not currently in the Server and cannot be kicked.",
                     ephemeral: true,
                 })
             }
@@ -75,8 +78,7 @@ module.exports = {
 					if (!specifiedUser.manageable) { // check that the bot *can* manage the specified user and if not, end and notify the user.
 						console.log(`The specified user ${specifiedUser.tag} is higher than the bot's role. (Staff member?)`)
 						return interaction.reply({
-							content: `This user (${specifiedUser}) is higher than me in roles.
-							Are you trying to kick a staff member?`,
+							content: `This user (${specifiedUser}) is higher than me in roles. Are you trying to kick a staff member?`,
 							ephemeral: true,
 						})
 					}

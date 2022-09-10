@@ -37,8 +37,10 @@ module.exports = {
     }),
     async execute(interaction) { // Executes the command.
         try {
-            // Funnels the provided aguments into variables.
-            const client = interaction.client
+            // Necessary constants
+            const {client} = interaction
+            const guildMembers = await interaction.guild.members
+            // Funnels the provided options into variables.
             const specifiedUser = interaction.options.getUser("user")
             const specifiedGuildMemeber = await interaction.guild.members.fetch(specifiedUser).catch(error => {})
             // The .catch ^here^ is implemented to prevent the bot from crashing.
@@ -66,12 +68,11 @@ module.exports = {
                 })
             }
             try {
-                // If the triggering user is higher in the hierarcy than the specified user, end and notify the user.s
+                // If the specfied user is higher in the hierarcy than the triggering user, end and notify the user.
 	            if (interaction.member.roles.highest.comparePositionTo(specifiedGuildMemeber.roles.highest) <= 0) {
 	                console.log(`${interaction.user.tag} has insufficent permissions to kick ${specifiedUser.tag}. (DiscordAPIError: MissionPermissions)`)
 	                return interaction.reply({
-	                    content: `The user ${specifiedUser} is at a higher (or equals) role than you and 
-	                    cannot be banned by you.`,
+	                    content: `The user ${specifiedUser} is at a higher (or equals) role than you and cannot be banned by you.`,
 	                    ephemeral: true,
 	                })
 	            }
@@ -90,16 +91,15 @@ module.exports = {
 					if (!specifiedUser.manageable) { // check that the bot *can* manage the specified user and if not, end and notify the user.
 						console.log(`The specified user ${specifiedUser.tag} is higher than the bot's role. (Staff member?)`)
 						return interaction.reply({
-							content: `This user (${specifiedUser}) is higher than me in roles.
-							Are you trying to ban a staff member?`,
+							content: `This user (${specifiedUser}) is higher than me in roles. Are you trying to ban a staff member?`,
 							ephemeral: true,
 						})
 					} else { 
-						console.log(`Unhandled Error. Error message: ${error.message}`)
-                		return interaction.reply({
-                    	content: `An unhandled error has occurred, please let my creator know (${interaction})`,
-                    	ephemeral: true,
-						})
+						console.log(error.message)
+                        return interaction.reply({
+                        content: `An unhandled error has occurred. Please let my creator know! (${client.users.fetch(process.env.CREATOR_ID)}) (Error message: ${error.message}))`,
+                        ephemeral: true,
+                        })
 					}
 			    }
                 return;
@@ -107,7 +107,7 @@ module.exports = {
             if (!interaction.replied){ // checks that the interaction wasn't already replied to (in case one of the error conditions above were triggered).
                 console.log(`The user ${interaction.user.tag}(id: ${interaction.user.id}) has successfully banned ${specifiedUser.tag}(id: ${specifiedUser.id}) from ${interaction.guild.name}(id: ${interaction.guild.id}).`)
                 return interaction.reply({
-                    content: `The user ${specifiedUser} has been banned for: ${reason}.`
+                    content: `Successfully banned ${specifiedUser}! (Reason: ${reason}).`
             }).catch(error => console.log(error))}
             } catch (err) {
                 console.log(err);

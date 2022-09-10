@@ -27,27 +27,7 @@ module.exports = {
     }),
 async execute(interaction) { // Executes the command.
     try {
-        // Old command permission checking (both user & bot)
-        /*
-        const memberPermissions = interaction.member.permissions
-        const appPermissions = interaction.appPermissions
-        console.log(memberPermissions.has(requiredPermission))
-        console.log(appPermissions.has(requiredPermission))
-        if(!memberPermissions.has(requiredPermission)) {
-            console.log(`The user ${interaction.user.tag} lacked the required permission ${requiredPermission}`);
-            return interaction.reply({
-                content: "You don't have the required permissions to use this command.",
-                ephemeral: true,
-            })} 
-
-        if(!appPermissions.has(requiredPermission)) {
-            console.log(`The bot lacks permission ${requiredPermission}`);
-            return interaction.reply({
-                content: "I don't have the required permissions to use this.",
-                ephemeral: true,
-            })}
-        */
-        // Funnels the provided aguments into variables.
+        // Funnels the provided options into variables.
         const Amount = interaction.options.getInteger("amount")
         if (isNaN(Amount) || (Amount % 1) != 0){ // If you get this response, let me know on discord (ItsLegend#9697).
             return interaction.reply({
