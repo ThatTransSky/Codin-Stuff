@@ -103,3 +103,8 @@ dist
 # TernJS port file
 .tern-port
 
+# vscode settings file
+.vscode/settings.json
+
+# Server's config files
+configs/*_config.json

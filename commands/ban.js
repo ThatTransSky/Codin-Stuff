@@ -42,7 +42,7 @@ module.exports = {
             const guildMembers = await interaction.guild.members
             // Funnels the provided options into variables.
             const specifiedUser = interaction.options.getUser("user")
-            const specifiedGuildMemeber = await interaction.guild.members.fetch(specifiedUser).catch(error => {})
+            const specifiedGuildMemeber = await guildMembers.fetch(specifiedUser).catch(error => {})
             // The .catch ^here^ is implemented to prevent the bot from crashing.
             // We don't need to handle the error at the moment cause it will be addressed later on in the code.
             let reason = interaction.options.getString("reason", false)
