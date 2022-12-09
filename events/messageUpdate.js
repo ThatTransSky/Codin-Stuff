@@ -1,12 +1,12 @@
 const { MessageEmbed } = require("discord.js");
-const Config = require("../handlers/ConfigHandler");
+const ConfigFile = require("../handlers/ConfigHandler");
 
 module.exports = {
     name: "messageUpdate",
     async execute(rawOldMsg, rawNewMsg) {
         try {
             const guild = rawOldMsg.guild
-            const config = new Config(guild.id)
+            const config = new ConfigFile(guild.id)
             const logChannelID = config.getSetting(`logChannelID`)
             try {
                 const msgChannel = await guild.channels.resolve(logChannelID)
