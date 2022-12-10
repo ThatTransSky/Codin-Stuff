@@ -4,11 +4,11 @@
  * - InvalidSettingName: Thrown when the provided settingName is empty or otherwise doesn't exist.
  */
 class ConfigErrorHandler extends Error {
-    constructor(message, type) {
-        super(message)
-        this.name = 'ConfigErrorHandler'
-        this.type = type
-    }
+  constructor(message, type) {
+    super(message);
+    this.name = 'ConfigErrorHandler';
+    this.type = type;
+  }
 }
 
-module.exports = ConfigErrorHandler
+module.exports = ConfigErrorHandler;

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("@discordjs/builders")
+const { SlashCommandBuilder } = require('@discordjs/builders');
 /*
 Command Name: "ping"
 Command Purpose: Checks that the bot is alive and well.
@@ -7,13 +7,11 @@ Checks (if any): None
 Note: If you find THIS command confusing, how?
 */
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName("ping")
-        .setDescription("Pong!"),
-    async execute(interaction) {
-        //console.log(interaction)
-        interaction.reply({
-            content: "Pong!",
-        })
-    }
-}
+  data: new SlashCommandBuilder().setName('ping').setDescription('Pong!'),
+  async execute(interaction) {
+    //console.log(interaction)
+    interaction.reply({
+      content: 'Pong!',
+    });
+  },
+};

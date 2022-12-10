@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("@discordjs/builders")
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
 /*
 Command Name: "clear"
@@ -15,47 +15,64 @@ Note: If the message deletion returns an unhandled error,
 */
 
 module.exports = {
-    data: new SlashCommandBuilder()
-    .setName("clear") // Sets the name.
-    .setDescription("Clears an amount of messages in the current channel. Use with caution!") // Sets the description.
+  data: new SlashCommandBuilder()
+    .setName('clear') // Sets the name.
+    .setDescription('Clears an amount of messages in the current channel. Use with caution!') // Sets the description.
     .setDefaultMemberPermissions(1 << 13) // Sets the required permissions.
-    .addIntegerOption((option) => { // Adds the options.
-        return option
-        .setName("amount")
-        .setDescription("Amount of messages to delete. Between 1-99.")
-        .setRequired(true) // Sets the option as required.
+    .addIntegerOption((option) => {
+      // Adds the options.
+      return option
+        .setName('amount')
+        .setDescription('Amount of messages to delete. Between 1-99.')
+        .setRequired(true); // Sets the option as required.
     }),
-async execute(interaction) { // Executes the command.
+  async execute(interaction) {
+    const { client } = interaction;
+    // Executes the command.
     try {
-        // Funnels the provided options into variables.
-        const Amount = interaction.options.getInteger("amount")
-        if (isNaN(Amount) || (Amount % 1) != 0){ // If you get this response, let me know on discord (ItsLegend#9697).
-            return interaction.reply({
-                content: "**Amount has to be an Integer!**",
-                ephemeral: true,
-            })
-        } else if (!(0 < Amount < 100)) { // If the number is below 1 or above 99, end and notify the user.
-            return interaction.reply({
-                content: "**Please use a number between 1-99!**",
-                ephemeral: true,
-            })
-        }
-        // console.log(Amount)
-        const { size } = await interaction.channel.bulkDelete(Amount) // Wait for the message deletion to complete and get the amount of messages deleted.
-        await interaction.reply({
-            content: `Successfully deleted ${size} messages!`,
-            ephemeral: true,
-        }).catch(error => { // This is here incase there are any unhandled errors. It is to prevent the bot from crashing by an error.
-            console.log(error.message)
-            return interaction.reply({
-            content: `An unhandled error has occurred. Please let my creator know! (${client.users.fetch(process.env.CREATOR_ID)}) (Error message: ${error.message}))`,
-            ephemeral: true,
-            })
+      // Funnels the provided options into variables.
+      const Amount = interaction.options.getInteger('amount');
+      if (isNaN(Amount) || Amount % 1 != 0) {
+        // If you get this response, let me know on discord (ItsLegend#9697).
+        return interaction.reply({
+          content: '**Amount has to be an Integer!**',
+          ephemeral: true,
+        });
+      } else if (!(0 < Amount < 100)) {
+        // If the number is below 1 or above 99, end and notify the user.
+        return interaction.reply({
+          content: '**Please use a number between 1-99!**',
+          ephemeral: true,
+        });
+      }
+      // console.log(Amount)
+      const { size } = await interaction.channel.bulkDelete(Amount); // Wait for the message deletion to complete and get the amount of messages deleted.
+      await interaction
+        .reply({
+          content: `Successfully deleted ${size} messages!`,
+          ephemeral: true,
         })
+        .catch((error) => {
+          // This is here incase there are any unhandled errors. It is to prevent the bot from crashing by an error.
+          console.log(error.message);
+          return interaction.reply({
+            content: `An unhandled error has occurred. Please let my creator know! (${client.users.fetch(
+              process.env.CREATOR_ID,
+            )}) (Error message: ${error.message}))`,
+            ephemeral: true,
+          });
+        });
     } catch (err) {
-        console.error(err);
-        return
+      if (err.code == 50034)
+        await interaction
+          .reply({
+            content:
+              'Could not finish clearing! Some messages you tried to delete may have been older than 14 days, which cannot be deleted automatically by bots.',
+            ephemeral: true,
+          })
+          .catch(() => {});
+      console.error(err);
+      return;
     }
-
-    } 
-}
+  },
+};
