@@ -1,4 +1,5 @@
-const { SlashCommandBuilder } = require("@discordjs/builders")
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const ErrorHandler = require('../handlers/ErrorHandler');
 
 /*
 Command Name: "clear"
@@ -15,47 +16,60 @@ Note: If the message deletion returns an unhandled error,
 */
 
 module.exports = {
-    data: new SlashCommandBuilder()
-    .setName("clear") // Sets the name.
-    .setDescription("Clears an amount of messages in the current channel. Use with caution!") // Sets the description.
+  data: new SlashCommandBuilder()
+    .setName('clear') // Sets the name.
+    .setDescription(
+      'Clears an amount of messages in the specified (or current) channel. Use with caution!',
+    ) // Sets the description.
     .setDefaultMemberPermissions(1 << 13) // Sets the required permissions.
-    .addIntegerOption((option) => { // Adds the options.
-        return option
-        .setName("amount")
-        .setDescription("Amount of messages to delete. Between 1-99.")
-        .setRequired(true) // Sets the option as required.
+    .addIntegerOption((option) => {
+      // Adds the options.
+      return option
+        .setName('amount')
+        .setDescription('Amount of messages to delete. Between 1-99.')
+        .setRequired(true); // Sets the option as required.
+    })
+    .addChannelOption((option) => {
+      return option.setName('channel').setDescription('The Channel to clear the messages from.');
     }),
-async execute(interaction) { // Executes the command.
+  async execute(interaction) {
+    // Executes the command.
+    const { client } = interaction;
+    await interaction.deferReply({
+      ephemeral: true,
+    });
     try {
-        // Funnels the provided options into variables.
-        const Amount = interaction.options.getInteger("amount")
-        if (isNaN(Amount) || (Amount % 1) != 0){ // If you get this response, let me know on discord (ItsLegend#9697).
-            return interaction.reply({
-                content: "**Amount has to be an Integer!**",
-                ephemeral: true,
-            })
-        } else if (!(0 < Amount < 100)) { // If the number is below 1 or above 99, end and notify the user.
-            return interaction.reply({
-                content: "**Please use a number between 1-99!**",
-                ephemeral: true,
-            })
-        }
-        // console.log(Amount)
-        const { size } = await interaction.channel.bulkDelete(Amount) // Wait for the message deletion to complete and get the amount of messages deleted.
-        await interaction.reply({
-            content: `Successfully deleted ${size} messages!`,
+      // Funnels the provided options into variables.
+      const Amount = interaction.options.getInteger('amount');
+      let specifiedChannel = interaction.options.getChannel('channel', false);
+      if (specifiedChannel === null) specifiedChannel = interaction.channel;
+      if (!(0 < Amount < 100)) {
+        // If the number is below 1 or above 99, end and notify the user.
+        return await interaction.editReply({
+          content: '**Please use a number between 1-99!**',
+          ephemeral: true,
+        });
+      }
+      try {
+        const { size } = await specifiedChannel.bulkDelete(Amount); // Wait for the message deletion to complete and get the amount of messages deleted.
+        return await interaction.editReply({
+          content: `Successfully deleted ${size} messages!`,
+          ephemeral: true,
+        });
+      } catch (err) {
+        const errObject = new ErrorHandler(err.message, err.code, 'clear');
+        if (errObject.shouldExit) {
+          return await interaction.editReply({
+            content: errObject.message,
             ephemeral: true,
-        }).catch(error => { // This is here incase there are any unhandled errors. It is to prevent the bot from crashing by an error.
-            console.log(error.message)
-            return interaction.reply({
-            content: `An unhandled error has occurred. Please let my creator know! (${client.users.fetch(process.env.CREATOR_ID)}) (Error message: ${error.message}))`,
-            ephemeral: true,
-            })
-        })
+          });
+        } else console.log(errObject.message);
+      }
     } catch (err) {
-        console.error(err);
-        return
+      const errObject = new ErrorHandler(err.message, err.code, 'clear');
+      console.log(`End of code catch triggered:
+      Message: ${errObject.message}
+      Code: ${errObject.code}`);
     }
-
-    } 
-}
+  },
+};

@@ -1,7 +1,8 @@
-const { SlashCommandBuilder } = require("@discordjs/builders")
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const ErrorHandler = require('../handlers/ErrorHandler');
 /*
 Command Name: "unban"
-Command Purpose: Revokes a user ban.
+Command Purpose: Removes a ban.
 Command Options (if any):
 - User_ID (User [cus discord is ̶s̶t̶u̶p̶i̶d̶  smart] Option, Required)
 - Reason (String Option, Default: No reason provided.)
@@ -13,71 +14,39 @@ Checks (if any):
 - Does the Guild have a ban associated with the User's ID?
 */
 module.exports = {
-    data: new SlashCommandBuilder()
-    .setName("unban") // Sets the name
-    .setDescription("Revokes a user ban.") // Sets the description
+  data: new SlashCommandBuilder()
+    .setName('unban') // Sets the name
+    .setDescription('Removes a ban.') // Sets the description
     .setDefaultMemberPermissions(1 << 2) // Sets the required permissions (BAN_MEMBERS)
-    .addUserOption((option) => { 
-        return option
-        .setName("user_id")
-        .setDescription("Enter the User's ID.")
-        .setRequired(true)
-    })
     .addUserOption((option) => {
-        return option
-        .setName("reason")
-        .setDescription("The Reason for Unbanning.")
+      return option.setName('user').setDescription("Enter the User's ID.").setRequired(true);
     }),
-    async execute(interaction) {
-        try {
-            const {client} = interaction
-            // Funnels the provided options into variables.
-            const specifiedUser = await client.users.fetch(interaction.options.getUser("user_id"))
-            // ̶^̶T̶h̶i̶s̶^̶ ̶c̶o̶u̶l̶d̶ ̶v̶e̶r̶y̶ ̶e̶a̶s̶i̶l̶y̶ ̶b̶e̶ ̶r̶e̶p̶l̶a̶c̶e̶d̶ ̶w̶i̶t̶h̶ ̶g̶e̶t̶U̶s̶e̶r̶ ̶a̶n̶d̶ ̶l̶e̶t̶ ̶D̶i̶s̶c̶o̶r̶d̶ ̶h̶a̶n̶d̶l̶e̶ ̶t̶h̶e̶ ̶e̶r̶r̶o̶r̶.̶  Done.
-            .catch(error => {
-                console.log(error.message)
-                return interaction.reply({
-                content: `An unhandled error has occurred. Please let my creator know! (${client.users.fetch(process.env.CREATOR_ID)}) (Error message: ${error.message}))`,
-                ephemeral: true,
-                })
-            })
-            let reason = interaction.options.getString("reason", false)
-            const guildBans = await interaction.guild.bans
-    
-            if (reason == null) {
-                reason = "No reason provided."
-            }
-            
-            if (interaction.user.id === specifiedUser.id) { // If the specified user = triggering user, end and notify the user.
-                return interaction.reply({
-                    content: "The user provided isn't--- Wait... You didn't really just try to unban yourself? *sigh* :person_facepalming:",
-                    ephemeral: true,
-                })
-            } else if (client.user.id === specifiedUser.id) { // You're talking to the bot, why did you think the bot's banned?
-                return interaction.reply({
-                    content: "Hello? I'm- I'm right here. I'm not banned, am I?",
-                    ephemeral: true,
-                })
-            } else {
-                await guildBans.remove(specifiedUser, reason)
-                // If the unban errors here, it is most likely due to the user never having a ban.
-                .catch(error => {
-                    console.log(error.message)
-                    return interaction.reply({
-                        content: `There was an error unbanning this user. Are you sure the user is banned? (Error Message: ${error.message})`,
-                        ephemeral: true,
-                    })
-                })
-            }
-            if (!interaction.replied) {
-                console.log(`Successfully unbanned ${specifiedUser.tag} from ${interaction.guild.name}`)
-                return interaction.reply({
-                    content: `Successfully unbanned ${specifiedUser}! :partying_face:`
-                })
-            }
-        } catch (error) {
-            console.log(error.message)
-            return;
-        }
+  async execute(interaction) {
+    await interaction.deferReply({
+      ephemeral: true,
+    });
+    try {
+      const { client } = interaction;
+      // Funnels the provided options into variables.
+      const specifiedUser = interaction.options.getUser('user');
+      let reason = interaction.options.getString('reason', false);
+      const guildBans = await interaction.guild.bans;
+      if (reason == null) {
+        reason = 'No reason provided.';
+      }
+      await guildBans.remove(specifiedUser, reason);
+      console.log(`Successfully unbanned ${specifiedUser.tag} from ${interaction.guild.name}`);
+      return await interaction.editReply({
+        content: `Successfully unbanned ${specifiedUser}! :partying_face:`,
+      });
+    } catch (err) {
+      const errObject = new ErrorHandler(err.message, err.code, 'unban');
+      if (errObject.shouldExit) {
+        return interaction.editReply({
+          content: errObject.message,
+          ephemeral: true,
+        });
+      } else console.log(errObject.message);
     }
-}
+  },
+};

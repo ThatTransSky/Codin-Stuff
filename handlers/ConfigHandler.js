@@ -1,13 +1,13 @@
 const fs = require(`fs`);
-const ConfigErrorHandler = require("./ConfigErrorHandler");
+const ConfigErrorHandler = require('./ConfigErrorHandler');
 
 /**
  * ConfigHandler (I FUCKING DID IT WOOOOOO):
  * Creates a Config Class to allow for the reading and
  * writing of a predefined settings file.
- * 
+ *
  * TODO:
- * - Allow for the creation of the file (with pre-defined defaults) 
+ * - Allow for the creation of the file (with pre-defined defaults)
  *   in case the file doesn't exists. DONE
  * - Extend that for other servers that are yet to have an
  *   existing Config file. (Format: serverID_config.json) AND DONE (I'm so amazing 🥰)
@@ -15,98 +15,88 @@ const ConfigErrorHandler = require("./ConfigErrorHandler");
  * @property {Object} [settings]
  */
 
-
 class ConfigFile extends ConfigErrorHandler {
-    
-      constructor(guildID = "") {
-        super()
-        if (guildID === "") {
-            throw new ConfigErrorHandler('The guildID is empty.', 'InvalidGuildID')
-        }
-        this.guildID = guildID
-        try {
-            const settings = JSON.parse(fs.readFileSync(`./configs/${guildID}_config.json`));
-            this.settings = {}
-            for (const [settingName, value] of Object.entries(settings)) {
-                this.settings[settingName] = value
-            }   
-        } catch (error) {
-            if (error.code === `ENOENT`) {
-                console.log(`The config for ${guildID} is missing. Creating...`);
-                const settings = this.createMissingConfigFile(guildID)
-                this.settings = {}
-                for (const [settingName, value] of Object.entries(settings)) {
-                    this.settings[settingName] = value
-                }
-            }
-        }
-        console.log('----\nConfig instance successfully created.\n----');
+  constructor(guildID = '') {
+    super();
+    if (guildID === '') {
+      throw new ConfigErrorHandler('The guildID is empty.', 'InvalidGuildID');
+    }
+    this.guildID = guildID;
+    try {
+      const settings = JSON.parse(fs.readFileSync(`./configs/${guildID}_config.json`));
+      this.settings = {};
+      for (const [settingName, value] of Object.entries(settings)) {
+        this.settings[settingName] = value;
       }
-
-
-    createMissingConfigFile(guildID = "") {
-
-        const defaultSettings = JSON.parse(fs.readFileSync(`./configs/default.json`))
-        fs.writeFileSync(`./configs/${guildID}_config.json`, JSON.stringify(defaultSettings))
-        return defaultSettings
-
-    }
-    //I don't really think this will have any actual use, considering
-    //the Config Object gets remade every time.
-
-    //Huh. Guess I was wrong :/
-    refreshConfigFile() {
-        
-        const settings = JSON.parse(fs.readFileSync(`./configs/${this.guildID}_config.json`))
-
-        this.settings = {}
+    } catch (error) {
+      if (error.code === `ENOENT`) {
+        console.log(`The config for ${guildID} is missing. Creating...`);
+        const settings = this.createMissingConfigFile(guildID);
+        this.settings = {};
         for (const [settingName, value] of Object.entries(settings)) {
-            this.settings[settingName] = value
+          this.settings[settingName] = value;
         }
-        return this.settings
+      }
     }
-    
-    updateSetting(settingName = "", value = "") {
+    console.log('----\nConfig instance successfully created.\n----');
+  }
 
-        this.settings = this.refreshConfigFile()
-        if (this.isSettingExist(settingName)) {
-            this.settings[settingName] = value
-            fs.writeFileSync(`./configs/${this.guildID}_config.json`, JSON.stringify(this.settings))
-            console.log(`The setting ${settingName} was accessed and updated to ${value}.`);
-        } else
-            throw new ConfigErrorHandler('The specified setting does not exist.', 'InvalidSettingName')
-        
+  createMissingConfigFile(guildID = '') {
+    const defaultSettings = JSON.parse(fs.readFileSync(`./configs/default.json`));
+    fs.writeFileSync(`./configs/${guildID}_config.json`, JSON.stringify(defaultSettings));
+    return defaultSettings;
+  }
+  //I don't really think this will have any actual use, considering
+  //the Config Object gets remade every time.
+
+  //Huh. Guess I was wrong :/
+  refreshConfigFile() {
+    const settings = JSON.parse(fs.readFileSync(`./configs/${this.guildID}_config.json`));
+
+    this.settings = {};
+    for (const [settingName, value] of Object.entries(settings)) {
+      this.settings[settingName] = value;
     }
+    return this.settings;
+  }
 
-    getSetting(settingName = "") {
+  updateSetting(settingName = '', value = '') {
+    this.settings = this.refreshConfigFile();
+    if (this.isSettingExist(settingName)) {
+      this.settings[settingName] = value;
+      fs.writeFileSync(`./configs/${this.guildID}_config.json`, JSON.stringify(this.settings));
+      console.log(`The setting ${settingName} was accessed and updated to ${value}.`);
+    } else
+      throw new ConfigErrorHandler('The specified setting does not exist.', 'InvalidSettingName');
+  }
 
-        this.settings = this.refreshConfigFile()
-        // console.log(this.settings[settingName])
-        if (this.isSettingExist(settingName)) {
-            console.log(`The setting ${settingName} was accessed.`);
-            return this.settings[settingName]
-        } else {
-            throw new ConfigErrorHandler(`The specified setting does not exist. Got ${settingName}`, 'InvalidSettingName')
-        }
+  getSetting(settingName = '') {
+    this.settings = this.refreshConfigFile();
+    // console.log(this.settings[settingName])
+    if (this.isSettingExist(settingName)) {
+      console.log(`The setting ${settingName} was accessed.`);
+      return this.settings[settingName];
+    } else {
+      throw new ConfigErrorHandler(
+        `The specified setting does not exist. Got ${settingName}`,
+        'InvalidSettingName',
+      );
     }
+  }
 
-    isSettingExist(settingName = "") {
-        
-        this.settings = this.refreshConfigFile()
-        return this.settings[settingName] === "undefined"
+  isSettingExist(settingName = '') {
+    this.settings = this.refreshConfigFile();
+    return this.settings[settingName] !== undefined;
+  }
 
+  toString() {
+    this.settings = this.refreshConfigFile();
+    let settingsStringified = ``;
+    for (const [settingName, value] of Object.entries(this.settings)) {
+      settingsStringified += `${settingName}=${value}`;
     }
-
-    toString() {
-
-        this.settings = this.refreshConfigFile()
-        const settingsStringified = ``
-        for (const [settingName, value] of Object.entries(this.settings)) {
-            settingsStringified += `${settingName}=${value}`
-        }
-        return settingsStringified
-
-    }
+    return settingsStringified;
+  }
 }
 
 module.exports = ConfigFile;

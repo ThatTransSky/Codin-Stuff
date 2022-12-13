@@ -1,2 +1,3 @@
-# the-pathetic-bot
-The Pathetic Server's custom made bot.
+# This a README file.
+
+I can't bother to write anything here, sue me.
