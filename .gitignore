@@ -108,6 +108,3 @@ dist
 
 # Server's config files
 configs/*_config.json
-
-# Prettier Formatting Config
-.prettierrc

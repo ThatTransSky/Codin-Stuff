@@ -42,7 +42,7 @@ module.exports = {
     } catch (err) {
       const errObject = new ErrorHandler(err.message, err.code, 'unban');
       if (errObject.shouldExit) {
-        return interaction.editReply({
+        return await interaction.editReply({
           content: errObject.message,
           ephemeral: true,
         });

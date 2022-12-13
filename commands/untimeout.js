@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const ErrorHandler = require('../handlers/ErrorHandler');
 /*
 Command Name: "untimeout"
 Command Purpose: Removes a user's timeout.
@@ -34,12 +35,18 @@ module.exports = {
       await guildMembers
         .fetch(specifiedUser)
         .then((specifiedGuildMember) => specifiedGuildMember.timeout(null));
-      console.log(`Successfully removed ${specifiedUser.tag}'s time out!`);
+      console.log(`Successfully removed ${specifiedUser.tag}'s timeout!`);
       return interaction.editReply({
         content: `Successfully removed ${specifiedUser}'s timeout!`,
       });
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      const errObject = new ErrorHandler(err.message, err.code, 'untimeout');
+      if (errObject.shouldExit) {
+        return await interaction.editReply({
+          content: errObject.message,
+          ephemeral: true,
+        });
+      } else console.log(errObject.message);
     }
   },
 };
