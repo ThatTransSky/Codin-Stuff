@@ -14,7 +14,11 @@ module.exports = {
       ephemeral: true,
     });
     const { client } = interaction;
-    const uptimeTimestamp = `<t:${Math.floor(client.readyAt / 1000)}:R>`;
+    const date = client.readyAt;
+
+    const rawTimestamp = Math.floor(client.readyAt / 1000);
+    const uptimeTimestamp = `<t:${rawTimestamp}:R>`;
+
     return interaction.editReply({
       content: `I was last online ${uptimeTimestamp}.`,
     });
