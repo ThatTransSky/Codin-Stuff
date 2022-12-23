@@ -20,7 +20,7 @@ module.exports = {
     try {
       await command.execute(interaction);
     } catch (err) {
-      const errObject = new ErrorHandler(err.message, err.code, '');
+      const errObject = new ErrorHandler(err, '');
       console.log(`Before interaction execution catch triggered:
       Message: ${errObject.message}
       Code: ${errObject.code}`);

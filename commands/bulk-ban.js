@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageEmbed } = require('discord.js');
+const ConfigFile = require('../handlers/ConfigHandler');
 const ErrorHandler = require('../handlers/ErrorHandler');
 /*
 Command Name: "bulk-ban"
@@ -35,10 +36,12 @@ module.exports = {
         );
     }),
   async execute(interaction) {
-    await interaction.deferReply({
-      ephemeral: true,
-    });
     try {
+      console.log(interaction);
+      const isEphemeral = new ConfigFile(interaction.guildId).getSetting('ban', 'ephemeral');
+      await interaction.deferReply({
+        ephemeral: isEphemeral,
+      });
       // Necessary constants
       const { client } = interaction;
       const guildMembers = await interaction.guild.members;
@@ -58,17 +61,17 @@ module.exports = {
             reason: reason,
           });
         } catch (err) {
-          const errObject = new ErrorHandler(err.message, err.code, 'bulk_ban');
+          const errObject = new ErrorHandler(err, 'bulk_ban');
           if (errObject.shouldExit) {
             if (errObject.message.includes('Invalid Request Format.'))
               return await interaction.editReply({
                 content:
                   'One (or more) of the user IDs provided are in an invalid format (most likely containing anything other than numbers).',
-                ephemeral: true,
+                ephemeral: true, // Always ephemeral since it's an Error reply.
               });
             return await interaction.editReply({
               content: errObject.message,
-              ephemeral: true,
+              ephemeral: true, // Always ephemeral since it's an Error reply.
             });
           } else {
             console.log(
@@ -106,10 +109,9 @@ module.exports = {
         );
       return await interaction.editReply({
         embeds: [resultEmbed],
-        ephemeral: true,
       });
     } catch (err) {
-      const errObject = new ErrorHandler(err.message, err.code, 'bulk_ban');
+      const errObject = new ErrorHandler(err, 'bulk_ban');
       console.log(`End of code catch triggered:
       Message: ${errObject.message}
       Code: ${errObject.code}`);

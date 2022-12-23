@@ -106,8 +106,9 @@ dist
 # vscode settings file
 .vscode/settings.json
 
-# Server's config files
+# Server and Personal config files
 configs/*_config.json
+configs/personal_configs/*_config.json
 
 # Ignore this :)
 ideas.txt

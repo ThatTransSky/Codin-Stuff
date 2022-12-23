@@ -1,3 +1,5 @@
+const ErrorHandler = require('../handlers/ErrorHandler');
+
 module.exports = {
   name: 'messageCreate',
   async execute(msg) {
@@ -7,13 +9,15 @@ module.exports = {
       const author = msg.author;
       if (author.id !== process.env.CLIENT_ID) {
         console.log(
-          `${author.username} (@${author.tag}) messaged "${msgContent}" in #${msgChannel.name}.`,
+          `${author.username} (${author.id}) messaged "${msgContent}" in #${msgChannel.name}.`,
         );
-      } else {
-        return;
       }
+      return;
     } catch (err) {
-      console.error(err);
+      const errObject = new ErrorHandler(err, 'Event');
+      console.log(`End of code catch triggered:
+      Message: ${errObject.message}
+      Code: ${errObject.code}`);
     }
   },
 };

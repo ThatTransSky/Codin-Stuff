@@ -34,10 +34,10 @@ module.exports = {
       return option.setName('reason').setDescription('The reason for the timeout.');
     }),
   async execute(interaction) {
-    await interaction.deferReply({
-      ephemeral: true,
-    });
     try {
+      await interaction.deferReply({
+        ephemeral: true,
+      });
       // Necessary constants
       const { client } = interaction;
       const guildMembers = await interaction.guild.members;
@@ -69,7 +69,7 @@ module.exports = {
         } minutes! (Reason: ${reason})`,
       });
     } catch (err) {
-      const errObject = new ErrorHandler(err.message, err.code, 'timeout');
+      const errObject = new ErrorHandler(err, 'timeout');
       if (errObject.shouldExit) {
         return await interaction.editReply({
           content: errObject.message,

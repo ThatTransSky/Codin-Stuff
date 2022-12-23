@@ -12,10 +12,10 @@ module.exports = {
     .setName('random-color') // Sets the name
     .setDescription('Gives you a random color.'), // Sets the description
   async execute(interaction) {
-    await interaction.deferReply({
-      ephemeral: true,
-    });
     try {
+      await interaction.deferReply({
+        ephemeral: true,
+      });
       // Necessary constants
       const { client } = interaction;
       const rgbColor = [
@@ -31,7 +31,7 @@ module.exports = {
         embeds: [embed.data],
       });
     } catch (err) {
-      const errObject = new ErrorHandler(err.message, err.code, 'random-color');
+      const errObject = new ErrorHandler(err, 'random-color');
       if (errObject.shouldExit) {
         return await interaction.editReply({
           content: errObject.message,

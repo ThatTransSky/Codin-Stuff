@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const ConfigFile = require('../handlers/ConfigHandler');
 const ErrorHandler = require('../handlers/ErrorHandler');
 /*
 Command Name: "kick"
@@ -26,10 +27,11 @@ module.exports = {
     }),
   async execute(interaction) {
     // Executes the command.
-    await interaction.deferReply({
-      ephemeral: true,
-    });
     try {
+      const isEphemeral = new ConfigFile(interaction.guildId);
+      await interaction.deferReply({
+        ephemeral: isEphemeral,
+      });
       // Necessary constants
       const { client } = interaction;
       const guildMembers = interaction.guild.members;
@@ -47,7 +49,7 @@ module.exports = {
         content: `The user ${specifiedUser} has been kicked for: ${reason}`,
       });
     } catch (err) {
-      const errObject = new ErrorHandler(err.message, err.code, 'kick');
+      const errObject = new ErrorHandler(err, 'kick');
       if (errObject.shouldExit) {
         return await interaction.editReply({
           content: errObject.message,

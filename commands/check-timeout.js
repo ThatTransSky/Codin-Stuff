@@ -16,10 +16,10 @@ module.exports = {
       return option.setName('user').setDescription('The User to check.').setRequired(true);
     }),
   async execute(interaction) {
-    await interaction.deferReply({
-      ephemeral: true,
-    });
     try {
+      await interaction.deferReply({
+        ephemeral: true,
+      });
       const { client } = interaction;
       const guildMembers = await interaction.guild.members;
       const specifiedUser = interaction.options.getUser('user');
@@ -37,7 +37,7 @@ module.exports = {
         });
       }
     } catch (err) {
-      const errObject = new ErrorHandler(err.message, err.code, 'check_timeout');
+      const errObject = new ErrorHandler(err, 'check_timeout');
       if (errObject.shouldExit) {
         return await interaction.editReply({
           content: errObject.message,

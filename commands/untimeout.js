@@ -23,10 +23,10 @@ module.exports = {
         .setRequired(true);
     }),
   async execute(interaction) {
-    await interaction.deferReply({
-      ephemeral: true,
-    });
     try {
+      await interaction.deferReply({
+        ephemeral: true,
+      });
       // Necessary constants
       const { client } = interaction;
       const guildMembers = await interaction.guild.members;
@@ -40,7 +40,7 @@ module.exports = {
         content: `Successfully removed ${specifiedUser}'s timeout!`,
       });
     } catch (err) {
-      const errObject = new ErrorHandler(err.message, err.code, 'untimeout');
+      const errObject = new ErrorHandler(err, 'untimeout');
       if (errObject.shouldExit) {
         return await interaction.editReply({
           content: errObject.message,

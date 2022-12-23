@@ -34,12 +34,12 @@ module.exports = {
     }),
   async execute(interaction) {
     // Executes the command.
-    const { client } = interaction;
-    await interaction.deferReply({
-      ephemeral: true,
-    });
     try {
+      await interaction.deferReply({
+        ephemeral: true,
+      });
       // Funnels the provided options into variables.
+      const { client } = interaction;
       const Amount = interaction.options.getInteger('amount');
       let specifiedChannel = interaction.options.getChannel('channel', false);
       if (specifiedChannel === null) specifiedChannel = interaction.channel;
@@ -57,7 +57,7 @@ module.exports = {
           ephemeral: true,
         });
       } catch (err) {
-        const errObject = new ErrorHandler(err.message, err.code, 'clear');
+        const errObject = new ErrorHandler(err, 'clear');
         if (errObject.shouldExit) {
           return await interaction.editReply({
             content: errObject.message,
@@ -66,7 +66,7 @@ module.exports = {
         } else console.log(errObject.message);
       }
     } catch (err) {
-      const errObject = new ErrorHandler(err.message, err.code, 'clear');
+      const errObject = new ErrorHandler(err, 'clear');
       console.log(`End of code catch triggered:
       Message: ${errObject.message}
       Code: ${errObject.code}`);

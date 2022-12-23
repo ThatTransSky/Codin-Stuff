@@ -1,3 +1,11 @@
 {
+  "general": {
     "logChannelID": ""
+  },
+  "ephemeral": {
+    "ban": true,
+    "kick": true,
+    "clear": true,
+    "timeout": true
+  }
 }

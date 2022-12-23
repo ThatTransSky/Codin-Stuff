@@ -22,10 +22,10 @@ module.exports = {
       return option.setName('user').setDescription("Enter the User's ID.").setRequired(true);
     }),
   async execute(interaction) {
-    await interaction.deferReply({
-      ephemeral: true,
-    });
     try {
+      await interaction.deferReply({
+        ephemeral: true,
+      });
       const { client } = interaction;
       // Funnels the provided options into variables.
       const specifiedUser = interaction.options.getUser('user');
@@ -40,7 +40,7 @@ module.exports = {
         content: `Successfully unbanned ${specifiedUser}! :partying_face:`,
       });
     } catch (err) {
-      const errObject = new ErrorHandler(err.message, err.code, 'unban');
+      const errObject = new ErrorHandler(err, 'unban');
       if (errObject.shouldExit) {
         return await interaction.editReply({
           content: errObject.message,

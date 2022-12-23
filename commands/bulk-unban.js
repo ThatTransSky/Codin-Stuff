@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageEmbed } = require('discord.js');
+const ConfigFile = require('../handlers/ConfigHandler');
 const ErrorHandler = require('../handlers/ErrorHandler');
 /*
 Command Name: "bulk-unban"
@@ -20,10 +21,11 @@ module.exports = {
         .setRequired(true);
     }),
   async execute(interaction) {
-    await interaction.deferReply({
-      ephemeral: true,
-    });
     try {
+      const isEphemeral = new ConfigFile(interaction.guildID).getSetting('ban', 'ephemeral');
+      await interaction.deferReply({
+        ephemeral: isEphemeral,
+      });
       // Necessary constants
       const { client } = interaction;
       const guildMembers = await interaction.guild.members;
@@ -39,7 +41,7 @@ module.exports = {
         try {
           await guildBans.remove(user);
         } catch (err) {
-          const errObject = new ErrorHandler(err.message, err.code, 'bulk_unban');
+          const errObject = new ErrorHandler(err, 'bulk_unban');
           if (errObject.shouldExit) {
             if (errObject.message.includes('Invalid Request Format.'))
               return await interaction.editReply({
@@ -77,12 +79,10 @@ module.exports = {
           {
             name: 'Successful Unbans',
             value: successfulUnbans,
-            inline: false,
           },
           {
             name: 'Unsuccessful Unbans',
             value: unseccessfulUnbans,
-            inline: false,
           },
         );
       return await interaction.editReply({
@@ -90,7 +90,7 @@ module.exports = {
         ephemeral: true,
       });
     } catch (err) {
-      const errObject = new ErrorHandler(err.message, err.code, 'bulk_unban');
+      const errObject = new ErrorHandler(err, 'bulk_unban');
       console.log(`End of code catch triggered:
       Message: ${errObject.message}
       Code: ${errObject.code}`);

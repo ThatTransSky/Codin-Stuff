@@ -1,5 +1,7 @@
+const { DiscordAPIError } = require('discord.js');
+
 /**
- * ErrorHandler (Hand-made by Sky (that's me because I like pain 🥰)).
+ * ErrorHandler (Hand-made by @FNItsLegend (that's me because I like pain 🥰)).
  *
  * All of the handling is within the constructor (because making it a seperate method seems pointless).
  * (Note to self: The ConfigErrorHandler I made passes the types as codes.)
@@ -14,15 +16,14 @@ class ErrorHandler {
   /**
    * ErrorHandler's Constructor.
    *
-   * @param {String} [message] - The Error message.
-   * @param {Number} [code] - The Error code.
+   * @param {DiscordAPIError | Error} [err] - The Error Object.
    * @param {String} [action] - The Action that was attempted before error-ing.
    * @returns {Boolean} (Boolean) Whether or not the code should exit or continue running.
    *
    */
-  constructor(message = String, code = Number ?? String, action = String) {
-    this.message = message;
-    this.code = code;
+  constructor(err, action) {
+    this.message = err.message;
+    this.code = err.code || undefined;
     this.action = action;
     this.shouldExit = false;
     const singleModeration = ['ban', 'kick', 'timeout', 'unban', 'untimeout', 'check_timeout'];
@@ -31,7 +32,7 @@ class ErrorHandler {
     const guildMemberRequired = ['kick', 'timeout', 'untimeout', 'check_timeout', 'bulk_kick'];
     const channelBasedActions = ['clear'];
     const messageBasedActions = ['clear', 'log', 'random_color'];
-    const configBasedActions = ['config_update', 'config_get'];
+    const configBasedActions = ['config', 'config-update', 'config-get'];
     if (this.message === 'Unknown User') {
       this.message = 'User does not exist within the DiscordAPI.';
       if (singleModeration.includes(this.action)) this.shouldExit = true; // If the action was performed on a single user, exit.
@@ -84,16 +85,21 @@ class ErrorHandler {
       this.message = 'The setting you were trying to access does not exist.';
       if (configBasedActions.includes(this.action)) this.shouldExit = true;
       return;
-    } else if (this.code === 'InvalidGuildID') {
+    } else if (this.code === 'InvalidGuildID' || this.code === 'EmptyGuildID') {
       // This should never execute unless the guild ID was purposefully invalid.
       this.message = 'The guild ID that was provided to the config was empty or invalid.';
       if (configBasedActions.includes(this.action)) this.shouldExit = true;
       return;
+    } else if (this.code === 'NoChangesMade') {
+      if (configBasedActions.includes(this.action)) this.shouldExit = true;
+      return;
     }
     this.message = `A non-fatal (or otherwise unhandled) error has occurred.\n
-    Message: ${message}\n
-    Code: ${code}\n
-    Action: ${action}`;
+    Message: ${this.message}\n
+    Code: ${this.code}\n
+    Action: ${this.action}\n
+    Raw Error Data: ${err}\n`;
+    this.shouldExit = true;
     return;
   }
 }

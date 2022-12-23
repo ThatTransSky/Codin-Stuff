@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageEmbed } = require('discord.js');
+const ConfigFile = require('../handlers/ConfigHandler');
 const ErrorHandler = require('../handlers/ErrorHandler');
 
 module.exports = {
@@ -21,10 +22,11 @@ module.exports = {
         );
     }),
   async execute(interaction) {
-    await interaction.deferReply({
-      ephemeral: true,
-    });
     try {
+      const isEphemeral = new ConfigFile(interaction.guildID).getSetting('kick', 'ephemeral');
+      await interaction.deferReply({
+        ephemeral: isEphemeral,
+      });
       const { client } = interaction;
       const guildMembers = await interaction.guild.members;
       let userIDs = interaction.options.getString('users');
@@ -39,14 +41,18 @@ module.exports = {
           await guildMember.kick(reason);
         } catch (err) {
           console.log(err.message);
-          const errObject = new ErrorHandler(err.message, err.code, 'bulk_kick');
+          const errObject = new ErrorHandler(err, 'bulk_kick');
           if (errObject.shouldExit) {
             if (errObject.message.includes('Invalid Request Form.'))
               return await interaction.editReply({
                 content:
                   'One (or more) of the user IDs provided are in an invalid format (most likely containing anything other than numbers).',
-                ephemeral: true,
+                ephemeral: true, // Always ephemeral since it's an Error reply.
               });
+            return await interaction.editReply({
+              content: errObject.message,
+              ephemeral: true, // Always ephemeral since it's an Error reply.
+            });
           } else {
             console.log(
               `The user ID (${user}) has caused this non-fatal error: ${errObject.message}`,
@@ -81,10 +87,9 @@ module.exports = {
         );
       return await interaction.editReply({
         embeds: [resultEmbed],
-        ephemeral: true,
       });
     } catch (err) {
-      const errObject = new ErrorHandler(err.message, err.code, 'bulk_kick');
+      const errObject = new ErrorHandler(err, 'bulk_kick');
       console.log(`End of code catch triggered:
         Message: ${errObject.message}
         Code: ${errObject.code}`);

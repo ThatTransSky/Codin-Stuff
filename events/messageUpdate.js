@@ -33,14 +33,14 @@ module.exports = {
           return;
         }
       } catch (err) {
-        const errObject = new ErrorHandler(err.message, err.code, 'log');
+        const errObject = new ErrorHandler(err, 'log');
         if (errObject.shouldExit) {
           console.log(`${logChannelID} was not found within ${guild.name} (id: ${guild.id})`);
           return;
         }
       }
     } catch (err) {
-      const errObject = new ErrorHandler(err.message, err.code, 'log');
+      const errObject = new ErrorHandler(err, 'log');
       console.log(`End of code catch triggered:
       Message: ${errObject.message}
       Code: ${errObject.code}`);

@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const ConfigFile = require('../handlers/ConfigHandler');
 const ErrorHandler = require('../handlers/ErrorHandler');
 /*
 Command Name: "ban"
@@ -35,13 +36,15 @@ module.exports = {
   async execute(interaction) {
     // Executes the command.
     try {
+      const isEphemeral = new ConfigFile(interaction.guildID).getSetting('ban', 'ephemeral');
+      await interaction.deferReply({
+        ephemeral: isEphemeral,
+      });
       // Necessary constants
       const { client } = interaction;
       const guildMembers = await interaction.guild.members;
       // Defers the reply to this interaction to not timeout :)
-      await interaction.deferReply({
-        ephemeral: true,
-      });
+
       // Funnels the provided options into variables.
       const specifiedUser = interaction.options.getUser('user');
       let reason = interaction.options.getString('reason', false);
@@ -54,7 +57,7 @@ module.exports = {
         return interaction.editReply({
           content: `The amount of days specified is higher than the maximum of 7 days.\n
                     (Your input: \`${interaction.option.getInteger('delete_messages')}\`)`,
-          ephemeral: true,
+          ephemeral: true, // Always ephemeral since it's an Error reply.
         });
       }
       if (reason == null) {
@@ -67,24 +70,22 @@ module.exports = {
           reason: reason,
         });
       } catch (err) {
-        const errObject = new ErrorHandler(err.message, err.code, 'ban');
+        const errObject = new ErrorHandler(err, 'ban');
         if (errObject.shouldExit) {
           return await interaction.editReply({
             content: errObject.message,
-            ephemeral: true,
+            ephemeral: true, // Always ephemeral since it's an Error reply.
           });
         } else console.log(errObject.message);
       }
       console.log(
         `The user ${interaction.user.tag} (id: ${interaction.user.id}) has successfully banned ${specifiedUser.tag} (id: ${specifiedUser.id}) from ${interaction.guild.name} (id: ${interaction.guild.id}).`,
       );
-      return await interaction
-        .editReply({
-          content: `Successfully banned ${specifiedUser}! (Reason: ${reason}).`,
-        })
-        .catch((error) => console.log(error));
+      return await interaction.editReply({
+        content: `Successfully banned ${specifiedUser}! (Reason: ${reason}).`,
+      });
     } catch (err) {
-      const errObject = new ErrorHandler(err.message, err.code, 'ban');
+      const errObject = new ErrorHandler(err, 'ban');
       console.log(`End of code catch triggered:
       Message: ${errObject.message}
       Code: ${errObject.code}`);
