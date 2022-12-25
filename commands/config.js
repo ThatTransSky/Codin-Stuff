@@ -145,7 +145,7 @@ module.exports = {
   async execute(interaction) {
     try {
       await interaction.deferReply({
-        ephemeral: true,
+        ephemeral: true, // Always Ephemeral because it's a config command :)
       });
       // Necessary constants
       const { client } = interaction;
@@ -167,14 +167,14 @@ module.exports = {
             embeds: [allSettings],
           });
         }
-        if (interaction.options.getSubcommand() === 'get') {
+        if (interaction.options.getSubcommand(true) === 'get') {
           const settingName = interaction.options.getString('setting_name');
           const settingValue = config.getSetting(settingName, settingCategory);
           return await interaction.editReply({
             content: `The setting \`${settingName}\` has the value of \` ${settingValue} \`.`,
           });
         }
-        if (interaction.options.getSubcommand() === 'update') {
+        if (interaction.options.getSubcommand(true) === 'update') {
           const settingName = interaction.options.getString('setting_name');
           const settingValue = config.getSetting(settingName, settingCategory);
           let updatedValue = undefined;
@@ -187,14 +187,13 @@ module.exports = {
             config.updateSetting(settingName, settingCategory, updatedValue);
             return await interaction.editReply({
               content: `The setting \`${settingName}\`, which had the value of \` ${settingValue} \`, now has the value of \` ${updatedValue} \`.`,
-              epheremal: true,
             });
           } catch (err) {
             const errObject = new ErrorHandler(err, 'config-update');
             if (errObject.shouldExit) {
               return await interaction.editReply({
                 content: errObject.message,
-                ephemeral: true,
+                ephemeral: true, // Always Ephemeral because it's an Error Reply.
               });
             } else console.log(errObject.message);
           }
@@ -204,7 +203,7 @@ module.exports = {
         if (errObject.shouldExit) {
           return await interaction.editReply({
             content: errObject.message,
-            ephemeral: true,
+            ephemeral: true, // Always Ephemeral because it's an Error Reply.
           });
         } else console.log(errObject.message);
       }

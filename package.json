@@ -15,7 +15,8 @@
     "discord-api-types": "^0.37.5",
     "discord.js": "^13.10.3",
     "dotenv": "^16.0.2",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "request": "^2.88.2"
   },
   "devDependencies": {
     "eslint": "^8.29.0",

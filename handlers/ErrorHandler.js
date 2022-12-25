@@ -32,7 +32,7 @@ class ErrorHandler {
     const guildMemberRequired = ['kick', 'timeout', 'untimeout', 'check_timeout', 'bulk_kick'];
     const channelBasedActions = ['clear'];
     const messageBasedActions = ['clear', 'log', 'random_color'];
-    const configBasedActions = ['config', 'config-update', 'config-get'];
+    const configRequiredActions = ['config', 'config-update', 'config-get', 'weather'];
     if (this.message === 'Unknown User') {
       this.message = 'User does not exist within the DiscordAPI.';
       if (singleModeration.includes(this.action)) this.shouldExit = true; // If the action was performed on a single user, exit.
@@ -83,15 +83,18 @@ class ErrorHandler {
       return;
     } else if (this.code === 'InvalidSettingName') {
       this.message = 'The setting you were trying to access does not exist.';
-      if (configBasedActions.includes(this.action)) this.shouldExit = true;
+      if (configRequiredActions.includes(this.action)) this.shouldExit = true;
       return;
-    } else if (this.code === 'InvalidGuildID' || this.code === 'EmptyGuildID') {
+    } else if (this.code === 'InvalidGuildID') {
       // This should never execute unless the guild ID was purposefully invalid.
       this.message = 'The guild ID that was provided to the config was empty or invalid.';
-      if (configBasedActions.includes(this.action)) this.shouldExit = true;
+      if (configRequiredActions.includes(this.action)) this.shouldExit = true;
       return;
     } else if (this.code === 'NoChangesMade') {
-      if (configBasedActions.includes(this.action)) this.shouldExit = true;
+      if (configRequiredActions.includes(this.action)) this.shouldExit = true;
+      return;
+    } else if (this.code === 'MissingParameters') {
+      if (configRequiredActions.includes(this.action)) this.shouldExit = true;
       return;
     }
     this.message = `A non-fatal (or otherwise unhandled) error has occurred.\n

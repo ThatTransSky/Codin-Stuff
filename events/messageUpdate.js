@@ -8,7 +8,7 @@ module.exports = {
     try {
       const guild = rawOldMsg.guild;
       const config = new ConfigFile(guild.id);
-      const logChannelID = config.getSetting(`logChannelID`);
+      const logChannelID = config.getSetting(`logChannelID`, 'general');
       try {
         const msgChannel = await guild.channels.fetch(logChannelID, { force: true });
         const oldMsg = rawOldMsg.content;
@@ -23,7 +23,7 @@ module.exports = {
               { name: `Updated Message`, value: newMsg },
             )
             .setTimestamp();
-          return msgChannel.send({
+          return await msgChannel.send({
             embeds: [logUpdatedMessage],
           });
         } else {

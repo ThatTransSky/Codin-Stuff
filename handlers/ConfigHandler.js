@@ -12,8 +12,9 @@ const ConfigErrorHandler = require('./ConfigErrorHandler');
  * - Extend that for other servers that are yet to have an
  *   existing Config file. (Format: serverID_config.json) AND DONE (I'm so amazing 🥰)
  *
- * @property {String} [guildID]
- * @property {Object} [settings]
+ * @property {String} [ID] - The ID of either a guild or a user.
+ * @property {Object} [settings] - The contents of the config file in an Object form.
+ * @property {String} [configType] - Whether the config is of a guild's or a user's.
  *
  */
 
@@ -21,26 +22,44 @@ class ConfigFile extends ConfigErrorHandler {
   /**
    * ConfigHandler Constructor
    *
-   * @param {String} [guildID] - The interaction's current guildID (used to look up the guild's config)
+   * @param {String} [configType] - The type of config (Personal / Guild) that the instance is referring to.
+   * @param {String} [ID] - The interaction's current guildID (used to look up the guild's config).
    *
    */
-  constructor(guildID = '') {
+  constructor(configType, ID) {
     super();
-    if (guildID === '' || guildID === undefined) {
-      throw new ConfigErrorHandler('The constructor was called without a GuildID.', 'EmptyGuildID');
-    }
-    this.guildID = guildID;
-    try {
-      const settings = JSON.parse(fs.readFileSync(`./configs/${guildID}_config.json`));
-      this.settings = settings;
-    } catch (error) {
-      if (error.code === `ENOENT`) {
-        console.log(`The config for ${guildID} is missing. Creating...`);
-        const settings = this.createMissingConfigFile(guildID);
-        this.settings = settings;
+    this.configType = configType;
+    this.ID = ID;
+    if (this.configType === 'guild') {
+      if (ID === '' || ID === undefined) {
+        throw new ConfigErrorHandler(
+          'The constructor was called without a GuildID.',
+          'MissingParameters',
+        );
       }
+      try {
+        const settings = JSON.parse(fs.readFileSync(`./configs/${ID}_config.json`));
+        this.settings = settings;
+      } catch (error) {
+        if (error.code === `ENOENT`) {
+          console.log(`The guild config for ${ID} is missing. Creating...`);
+          const settings = this.createMissingConfigFile(ID);
+          this.settings = settings;
+        }
+      }
+      console.log('------------\nGuild Config instance successfully created.\n------------');
+    } else if (this.configType === 'personal') {
+      try {
+        const settings = JSON.parse(
+          fs.readFileSync(`./configs/personal_configs/${ID}_config.json`),
+        );
+      } catch (err) {}
+    } else {
+      throw new ConfigErrorHandler(
+        'The Constructor was called without a configType.',
+        'MissingParameters',
+      );
     }
-    console.log('------------\nConfig instance successfully created.\n------------');
   }
 
   /**
@@ -49,15 +68,28 @@ class ConfigFile extends ConfigErrorHandler {
    * Creates a config file for using provided guild ID using the default config.
    *
    * @private
-   * @param {String} [guildID] - The guild ID to make a config for.
+   * @param {String} [ID] - The guild ID to make a config for.
    *
    * @returns {Object} The default settings in an Object form.
    */
 
-  createMissingConfigFile(guildID) {
-    const defaultSettings = JSON.parse(fs.readFileSync(`./configs/default.json`));
-    fs.writeFileSync(`./configs/${guildID}_config.json`, JSON.stringify(defaultSettings));
-    return defaultSettings;
+  createMissingConfigFile() {
+    if (this.configType === 'guild') {
+      const defaultSettings = JSON.parse(fs.readFileSync(`./configs/default.json`));
+      fs.writeFileSync(`./configs/${this.ID}_config.json`, JSON.stringify(defaultSettings));
+      return defaultSettings;
+    } else if (this.configType === 'personal') {
+      const defaultSettings = JSON.parse(
+        fs.readFileSync(`./configs/personal_configs/default.json`),
+      );
+      fs.writeFileSync(
+        `./configs/personal_configs/${this.ID}_config.json`,
+        JSON.stringify(defaultSettings),
+      );
+      return defaultSettings;
+    } else {
+      throw new ConfigErrorHandler('this.configType is missing a value.', 'MissingParameters');
+    }
   }
 
   /**
@@ -67,12 +99,23 @@ class ConfigFile extends ConfigErrorHandler {
    *
    * @private
    * @returns {Object} The guild's current settings in Object form.
+   *
    */
 
   refreshConfigFile() {
-    const settings = JSON.parse(fs.readFileSync(`./configs/${this.guildID}_config.json`));
-    this.settings = settings;
-    return this.settings;
+    if (this.configType === 'guild') {
+      const settings = JSON.parse(fs.readFileSync(`./configs/${this.ID}_config.json`));
+      this.settings = settings;
+      return this.settings;
+    } else if (this.configType === 'personal') {
+      const settings = JSON.parse(
+        fs.readFileSync(`./configs/personal_configs/${this.ID}_config.json`),
+      );
+      this.settings = settings;
+      return this.settings;
+    } else {
+      throw new ConfigErrorHandler('this.configType is missing a value.', 'MissingParameters');
+    }
   }
 
   /**
@@ -88,7 +131,16 @@ class ConfigFile extends ConfigErrorHandler {
     if (this.doesSettingExist(settingName, settingCategory)) {
       if (this.settings[settingCategory][settingName] !== updatedValue) {
         this.settings[settingCategory][settingName] = updatedValue;
-        fs.writeFileSync(`./configs/${this.guildID}_config.json`, JSON.stringify(this.settings));
+        if (this.configType === 'guild') {
+          fs.writeFileSync(`./configs/${this.ID}_config.json`, JSON.stringify(this.settings));
+        } else if (this.configType === 'personal') {
+          fs.writeFileSync(
+            `./configs/personal_configs/${this.ID}_config.json`,
+            JSON.stringify(this.settings),
+          );
+        } else {
+          throw new ConfigErrorHandler('this.configType is missing a value.', 'MissingParameters');
+        }
         console.log(`The setting ${settingName} was accessed and updated to ${updatedValue}.`);
       } else {
         throw new ConfigErrorHandler(
