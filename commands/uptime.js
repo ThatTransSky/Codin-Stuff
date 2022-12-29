@@ -20,7 +20,7 @@ module.exports = {
     const uptimeTimestamp = `<t:${rawTimestamp}:R>`;
 
     return interaction.editReply({
-      content: `I was last online ${uptimeTimestamp}.`,
+      content: `I was ✨*turned on*✨ ${uptimeTimestamp}.`,
     });
   },
 };

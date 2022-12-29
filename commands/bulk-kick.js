@@ -23,7 +23,8 @@ module.exports = {
     }),
   async execute(interaction) {
     try {
-      const isEphemeral = new ConfigFile(interaction.guildID).getSetting('kick', 'ephemeral');
+      const config = new ConfigFile('guild', interaction.guildId);
+      const isEphemeral = config.getSetting('kick', 'ephemeral');
       await interaction.deferReply({
         ephemeral: isEphemeral,
       });

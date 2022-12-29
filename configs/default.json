@@ -7,5 +7,12 @@
     "kick": true,
     "clear": true,
     "timeout": true
+  },
+  "guild_info": {
+    "name": "",
+    "id": "",
+    "owner_id": "",
+    "member_count": "",
+    "administrators": []
   }
 }

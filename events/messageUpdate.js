@@ -7,25 +7,27 @@ module.exports = {
   async execute(rawOldMsg, rawNewMsg) {
     try {
       const guild = rawOldMsg.guild;
-      const config = new ConfigFile(guild.id);
-      const logChannelID = config.getSetting(`logChannelID`, 'general');
       try {
-        const msgChannel = await guild.channels.fetch(logChannelID, { force: true });
         const oldMsg = rawOldMsg.content;
         const newMsg = rawNewMsg.content;
-        if (oldMsg !== newMsg) {
-          const logUpdatedMessage = new MessageEmbed()
-            .setColor(0xc46090)
-            .setDescription(`A message was edited.`)
-            .setTitle(`Logger`)
-            .addFields(
-              { name: `Original Message`, value: oldMsg },
-              { name: `Updated Message`, value: newMsg },
-            )
-            .setTimestamp();
-          return await msgChannel.send({
-            embeds: [logUpdatedMessage],
-          });
+        if ((rawOldMsg.author.id || rawNewMsg.author.id) !== process.env.CLIENT_ID) {
+          if (oldMsg !== newMsg) {
+            const config = new ConfigFile('guild', guild);
+            const logChannelID = config.getSetting(`logChannelID`, 'general');
+            const loggingChannel = await guild.channels.fetch(logChannelID, { force: true });
+            const logUpdatedMessage = new MessageEmbed()
+              .setColor(0xc46090)
+              .setDescription(`A message was edited.`)
+              .setTitle(`Logger`)
+              .addFields(
+                { name: `Original Message`, value: oldMsg },
+                { name: `Updated Message`, value: newMsg },
+              )
+              .setTimestamp();
+            return await loggingChannel.send({
+              embeds: [logUpdatedMessage],
+            });
+          }
         } else {
           console.log(`messageUpdate event triggered without recorded changes.`);
           console.log(`Old message:\n${oldMsg}`);
@@ -35,9 +37,10 @@ module.exports = {
       } catch (err) {
         const errObject = new ErrorHandler(err, 'log');
         if (errObject.shouldExit) {
-          console.log(`${logChannelID} was not found within ${guild.name} (id: ${guild.id})`);
+          if (errObject.message === '')
+            console.log(`${logChannelID} was not found within ${guild.name} (id: ${guild.id})`);
           return;
-        }
+        } else console.log(err);
       }
     } catch (err) {
       const errObject = new ErrorHandler(err, 'log');

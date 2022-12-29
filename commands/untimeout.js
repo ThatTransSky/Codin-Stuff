@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const ConfigFile = require('../handlers/ConfigHandler');
 const ErrorHandler = require('../handlers/ErrorHandler');
 /*
 Command Name: "untimeout"
@@ -24,8 +25,10 @@ module.exports = {
     }),
   async execute(interaction) {
     try {
+      const config = new ConfigFile('guild', interaction.guildId);
+      const isEphemeral = config.getSetting('timeout', 'ephemeral');
       await interaction.deferReply({
-        ephemeral: true,
+        ephemeral: isEphemeral,
       });
       // Necessary constants
       const { client } = interaction;

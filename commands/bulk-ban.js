@@ -37,8 +37,8 @@ module.exports = {
     }),
   async execute(interaction) {
     try {
-      console.log(interaction);
-      const isEphemeral = new ConfigFile(interaction.guildId).getSetting('ban', 'ephemeral');
+      const config = new ConfigFile('guild', interaction.guildId);
+      const isEphemeral = config.getSetting('ban', 'ephemeral');
       await interaction.deferReply({
         ephemeral: isEphemeral,
       });
