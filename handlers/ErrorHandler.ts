@@ -1,30 +1,32 @@
-const { DiscordAPIError } = require('discord.js');
+import { DiscordAPIError } from 'discord.js';
+import { ConfigErrorHandler } from './ConfigErrorHandler.js';
 
 /**
  * ErrorHandler (Hand-made by Sky (that's me because I like pain 🥰)).
  *
  * All of the handling is within the constructor (because making it a seperate method seems pointless).
  * (Note to self: The ConfigErrorHandler I made passes the types as codes.)
- * @author Sky <Discord: Sky <3#9697>
- * @property {String} [message] The Error message.
- * @property {Number} [code] The Error code.
- * @property {String} [stack] The Error stack.
- * @property {String} [action] The Action that was attempted before error-ing.
- * @property {Boolean} [shouldExit] Whether or not the code should exit or continue running.
+ *
  *
  */
-class ErrorHandler {
+export class ErrorHandler {
   /**
    * ErrorHandler's Constructor.
    *
-   * @param {DiscordAPIError | Error } [err] The Error Object.
-   * @param {String} [action] The Action that was attempted before error-ing.
-   * @returns {Boolean} (Boolean) Whether or not the code should exit or continue running.
+   * @param {DiscordAPIError | Error | ConfigErrorHandler} err The Error Object.
+   * @param {String} action The Action that was attempted before error-ing.
    *
    */
-  constructor(err, action) {
+  public message: string;
+  public code: string | number;
+  public stack: string;
+  public action: string;
+  public shouldExit?: boolean;
+  constructor(err: DiscordAPIError | Error, action: string) {
     this.message = err.message;
-    this.code = err.code || err.httpStatus || undefined;
+    if (err instanceof DiscordAPIError) this.code = err.status;
+    else if (err instanceof ConfigErrorHandler) this.code = err.code;
+    else this.code = undefined;
     this.stack = err.stack;
     this.action = action;
     this.shouldExit = false;
@@ -57,7 +59,7 @@ class ErrorHandler {
     } else if (this.message === 'Unknown Channel') {
       this.code = this.message;
       this.message = `The channel you were trying to reference is either unknown, 
-        invalid, or not within the bot's (or the user's) scope of permissions.`;
+      invalid, or not within the bot's (or the user's) scope of permissions.`;
       if (channelBasedActions.includes(this.action) || messageBasedActions.includes(this.action))
         this.shouldExit = true;
       return;
@@ -80,7 +82,7 @@ class ErrorHandler {
           'The /clear command encountered a message that is older than 14 days. Try reducing the amount of messages.';
       else
         this.message = `The message you were trying to reference is either unknown,
-      invalid, or inside of a channel that either you (or the bot) don't have access to.`;
+    invalid, or inside of a channel that either you (or the bot) don't have access to.`;
       if (messageBasedActions.includes(this.action)) this.shouldExit = true;
       return;
     } else if (this.message === 'Unknown Ban') {
@@ -109,14 +111,12 @@ class ErrorHandler {
       return;
     }
     this.message = `A non-fatal (or otherwise unhandled) error has occurred.\n
-    Message: ${this.message}\n
-    Code: ${this.code}\n
-    Action: ${this.action}\n
-    Raw Error Data: ${err.stack || err}\n`;
+  Message: ${this.message}\n
+  Code: ${this.code}\n
+  Action: ${this.action}\n
+  Raw Error Data: ${err.stack || err}\n`;
     this.code = 'Unhandled';
     this.shouldExit = true;
     return;
   }
 }
-
-module.exports = ErrorHandler;

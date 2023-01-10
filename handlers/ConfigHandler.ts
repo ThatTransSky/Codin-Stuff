@@ -1,7 +1,7 @@
-const { Guild, User } = require('discord.js');
-const fs = require(`fs`);
-const stringify = require('json-stringify-pretty-compact');
-const ConfigErrorHandler = require('./ConfigErrorHandler');
+import { Guild, User } from 'discord.js';
+import * as fs from 'fs';
+import stringify from 'json-stringify-pretty-compact';
+import { ConfigErrorHandler } from './ConfigErrorHandler.js';
 
 /**
  * ConfigHandler (I FUCKING DID IT WOOOOOO):
@@ -16,20 +16,21 @@ const ConfigErrorHandler = require('./ConfigErrorHandler');
  *
  */
 
-class ConfigFile extends ConfigErrorHandler {
+export class Config {
   /**
    * ConfigHandler Constructor
    * @constructor
-   * @param {String} [configType] - The type of config (Personal / Guild) that the instance is referring to.
-   * @param {Guild | User} [UIDObject] - The interaction's current user's / guild's Object.
+   * @param {String} configType - The type of config (Personal / Guild) that the instance is referring to.
+   * @param {Guild | User} UIDObject - The interaction's current user's / guild's Object.
    *
    */
-  constructor(configType, UIDObject) {
-    super();
-    this.configType = configType.toLowerCase();
+  public UIDObject: Guild | User;
+  private id: string;
+  private settings: JSON;
+  constructor(UIDObject: Guild | User) {
     this.UIDObject = UIDObject;
-    this.id = this.UIDObject.id;
-    if (this.configType === 'guild') {
+    if (UIDObject instanceof Guild) {
+      this.id = UIDObject.id;
       if (this.id === ('' || undefined || null)) {
         throw new ConfigErrorHandler(
           'The constructor was called without an ID.',
@@ -37,7 +38,7 @@ class ConfigFile extends ConfigErrorHandler {
         );
       }
       try {
-        const settings = JSON.parse(fs.readFileSync(`./configs/${this.id}_config.json`));
+        const settings = JSON.parse(fs.readFileSync(`./configs/${this.id}_config.json`).toString());
         this.settings = settings;
       } catch (err) {
         if (err.code === `ENOENT`) {
@@ -47,7 +48,8 @@ class ConfigFile extends ConfigErrorHandler {
         }
       }
       console.log('------------\nGuild Config instance successfully created.\n------------');
-    } else if (this.configType === 'personal') {
+    } else if (UIDObject instanceof User) {
+      this.id = UIDObject.id;
       if (this.id === ('' || undefined || null)) {
         throw new ConfigErrorHandler(
           'The constructor was called without an ID.',
@@ -56,7 +58,7 @@ class ConfigFile extends ConfigErrorHandler {
       }
       try {
         const settings = JSON.parse(
-          fs.readFileSync(`./configs/personal_configs/${this.id}_config.json`),
+          fs.readFileSync(`./configs/personal_configs/${this.id}_config.json`).toString(),
         );
         this.settings = settings;
       } catch (err) {
@@ -69,7 +71,7 @@ class ConfigFile extends ConfigErrorHandler {
       console.log('------------\nPersonal Config instance successfully created.\n------------');
     } else {
       throw new ConfigErrorHandler(
-        'The Constructor was called without a configType.',
+        'The Constructor was called without either a Guild or a User Object.',
         'MissingParameters',
       );
     }
@@ -81,30 +83,32 @@ class ConfigFile extends ConfigErrorHandler {
    * Creates a config file for using provided guild ID using the default config.
    *
    * @private
-   * @param {String} [ID] The guild ID to make a config for.
    *
-   * @returns {Object} The default settings in an Object form.
+   * @returns {JSON} The default settings in an Object form.
    */
 
-  createMissingConfigFile() {
-    if (this.configType === 'guild') {
-      const defaultSettings = JSON.parse(fs.readFileSync(`./configs/default.json`));
+  private createMissingConfigFile(): JSON {
+    if (this.UIDObject instanceof Guild) {
+      const defaultSettings = JSON.parse(fs.readFileSync(`./configs/default.json`).toString());
       fs.writeFileSync(
         `./configs/${this.id}_config.json`,
-        stringify(defaultSettings, { maxLength: 0, alignKeys: true }),
+        stringify(defaultSettings, { maxLength: 0 }),
       );
       return defaultSettings;
-    } else if (this.configType === 'personal') {
+    } else if (this.UIDObject instanceof User) {
       const defaultSettings = JSON.parse(
-        fs.readFileSync(`./configs/personal_configs/default.json`),
+        fs.readFileSync(`./configs/personal_configs/default.json`).toString(),
       );
       fs.writeFileSync(
         `./configs/personal_configs/${this.id}_config.json`,
-        stringify(defaultSettings, { maxLength: 0, alignKeys: true }),
+        stringify(defaultSettings, { maxLength: 0 }),
       );
       return defaultSettings;
     } else {
-      throw new ConfigErrorHandler('this.configType is missing a value.', 'MissingParameters');
+      throw new ConfigErrorHandler(
+        'this.UIDObject is neither a Guild or a User.',
+        'MissingParameters',
+      );
     }
   }
 
@@ -112,14 +116,11 @@ class ConfigFile extends ConfigErrorHandler {
    * updateGuildInfo():
    * Used to update the Guild's Info section in the config
    * with the guild's current information.
-   *
-   * @param {Guild} [guild] The Guild Object that we're taking information out of.
-   *
-   *
    */
   async updateGuildInfo() {
+    if (this.UIDObject instanceof User) return;
     const members = await this.UIDObject.members.fetch();
-    const administrators = members.filter((member) => member.permissions.has('ADMINISTRATOR'));
+    const administrators = members.filter((member) => member.permissions.has('Administrator'));
     let administratorsObject = [];
     let count = 0;
     administrators.forEach((administrator) => {
@@ -146,7 +147,6 @@ class ConfigFile extends ConfigErrorHandler {
       `./configs/${this.id}_config.json`,
       stringify(this.settings, {
         maxLength: 0,
-        alignKeys: true,
       }),
     );
   }
@@ -160,17 +160,20 @@ class ConfigFile extends ConfigErrorHandler {
    *
    */
 
-  refreshConfigFile() {
-    if (this.configType === 'guild') {
-      const settings = JSON.parse(fs.readFileSync(`./configs/${this.ID}_config.json`));
+  private refreshConfigFile() {
+    if (this.UIDObject instanceof Guild) {
+      const settings = JSON.parse(fs.readFileSync(`./configs/${this.id}_config.json`).toString());
       this.settings = settings;
-    } else if (this.configType === 'personal') {
+    } else if (this.UIDObject instanceof User) {
       const settings = JSON.parse(
-        fs.readFileSync(`./configs/personal_configs/${this.ID}_config.json`),
+        fs.readFileSync(`./configs/personal_configs/${this.id}_config.json`).toString(),
       );
       this.settings = settings;
     } else {
-      throw new ConfigErrorHandler('this.configType is missing a value.', 'MissingParameters');
+      throw new ConfigErrorHandler(
+        'this.UIDObject is neither a Guild or a User.',
+        'MissingParameters',
+      );
     }
   }
 
@@ -182,23 +185,30 @@ class ConfigFile extends ConfigErrorHandler {
    * @param {String | Boolean} [updatedValue] The updated value.
    */
 
-  updateSetting(settingName, settingCategory, updatedValue) {
+  public updateSetting(
+    settingName: string,
+    settingCategory: string,
+    updatedValue: string | boolean | number,
+  ) {
     this.refreshConfigFile();
     if (this.doesSettingExist(settingName, settingCategory)) {
       if (this.settings[settingCategory][settingName] !== updatedValue) {
         this.settings[settingCategory][settingName] = updatedValue;
-        if (this.configType === 'guild') {
+        if (this.UIDObject instanceof Guild) {
           fs.writeFileSync(
-            `./configs/${this.ID}_config.json`,
-            stringify(this.settings, { maxLength: 0, alignKeys: true }),
+            `./configs/${this.id}_config.json`,
+            stringify(this.settings, { maxLength: 0 }),
           );
-        } else if (this.configType === 'personal') {
+        } else if (this.UIDObject instanceof User) {
           fs.writeFileSync(
-            `./configs/personal_configs/${this.ID}_config.json`,
-            stringify(this.settings, { maxLength: 0, alignKeys: true }),
+            `./configs/personal_configs/${this.id}_config.json`,
+            stringify(this.settings, { maxLength: 0 }),
           );
         } else {
-          throw new ConfigErrorHandler('this.configType is missing a value.', 'MissingParameters');
+          throw new ConfigErrorHandler(
+            'this.UIDObject is neither a Guild or a User.',
+            'MissingParameters',
+          );
         }
         console.log(`The setting ${settingName} was accessed and updated to ${updatedValue}.`);
       } else {
@@ -220,7 +230,7 @@ class ConfigFile extends ConfigErrorHandler {
    * @returns {String | Boolean} The setting's current value.
    */
 
-  getSetting(settingName, settingCategory) {
+  public getSetting(settingName: string, settingCategory: string): string | boolean | number {
     this.refreshConfigFile();
     if (this.doesSettingExist(settingName, settingCategory)) {
       console.log(`The setting ${settingName} was accessed.`);
@@ -242,12 +252,12 @@ class ConfigFile extends ConfigErrorHandler {
    * @return {Boolean} Whether the setting exists or not.
    */
 
-  doesSettingExist(settingName, settingCategory) {
+  public doesSettingExist(settingName: string, settingCategory: string): boolean {
     this.refreshConfigFile();
     return this.settings[settingCategory][settingName] !== undefined;
   }
 
-  toString() {
+  public toString(): string {
     this.refreshConfigFile();
     let str = '';
     for (const key in this.settings) {
@@ -259,5 +269,3 @@ class ConfigFile extends ConfigErrorHandler {
     return str;
   }
 }
-
-module.exports = ConfigFile;
