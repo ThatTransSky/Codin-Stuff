@@ -7,6 +7,8 @@ import {
   Client,
   TextInputStyle,
   Interaction,
+  InteractionType,
+  ButtonInteraction,
 } from 'discord.js';
 import { Config } from '../handlers/ConfigHandler.js';
 import { ErrorHandler } from '../handlers/ErrorHandler.js';
@@ -23,12 +25,12 @@ Event Arguments:
 export const name = 'interactionCreate';
 export async function execute(interaction: Interaction, client: Client2) {
   try {
-    if (interaction.isCommand()) {
+    if (interaction.type === InteractionType.ApplicationCommand) {
       // Handle Slash Commands Here
       const command = client.commands.get(interaction.commandName);
-      if (!command) return; //Not used at the moment.
+      if (!command || !interaction.isChatInputCommand()) return; //Not used at the moment.
       await command.execute(interaction);
-    } else if (interaction.isModalSubmit()) {
+    } else if (interaction.type === InteractionType.ModalSubmit) {
       // Handle Modal Interactions Here
       if (interaction.customId === 'personal_settings') {
       }
@@ -40,34 +42,24 @@ export async function execute(interaction: Interaction, client: Client2) {
           components: [],
         });
       }
-    } else if (interaction.isStringSelectMenu()) {
-      // if (interaction.replied) await interaction.editReply({});
-      // else await interaction.deferReply({});
+    } else if (interaction.type === InteractionType.MessageComponent) {
       // Handle Select Menu Interactions Here
-      if (interaction.customId === 'settings_configType') {
+      if (interaction.customId === 'settings_type') {
+        // First Stage Settings
         const interactionValue = interaction.values[0];
         // console.log(interactionValue);
         if (interactionValue === 'personal') {
           const config = new Config(interaction.user);
           const modal = new ModalBuilder()
             .setTitle('Personal Settings')
-            .setCustomId('personal_settings')
-            .addComponents(
-              new ActionRowBuilder<TextInputBuilder>().addComponents(
-                new TextInputBuilder()
-                  .setCustomId('weather_location')
-                  .setLabel('/weather Saved Location')
-                  .setPlaceholder(config.getSetting('weather_location', 'general') as string)
-                  .setRequired(false)
-                  .setStyle(TextInputStyle.Short),
-              ),
-            );
+            .setCustomId('personal_category')
+            .addComponents();
           await interaction.showModal(modal);
         } else if (interactionValue === 'guild') {
           if (interaction.memberPermissions.has('ManageGuild')) {
             const SettingSelectMenu = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
               new StringSelectMenuBuilder()
-                .setCustomId('guild_setting_name')
+                .setCustomId('guild_category')
                 .setPlaceholder('Select the setting you want to view.')
                 .addOptions([
                   {

@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, italic, Message, time } from 'discord.js';
 /* 
 Command Name: "uptime"
 Command Purpose: Show the bot's current uptime.
@@ -11,15 +11,15 @@ export const data = new SlashCommandBuilder()
   .setDescription('Shows how long have the bot been online for.');
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply({
-    ephemeral: true,
+    ephemeral: false,
   });
   const client = interaction.client;
   const readyAt = client.readyAt.getTime();
 
   const rawTimestamp = Math.floor(readyAt / 1000);
-  const uptimeTimestamp = `<t:${rawTimestamp}:R>`;
+  const uptimeTimestamp = time(rawTimestamp, 'R'); // Discord.JS's method to format timestamps messages
 
   return interaction.editReply({
-    content: `I was ✨*turned on*✨ ${uptimeTimestamp}.`,
+    content: `I was ✨${italic('turned on')}✨ ${uptimeTimestamp}.`,
   });
 }

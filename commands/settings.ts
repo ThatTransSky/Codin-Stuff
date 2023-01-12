@@ -12,7 +12,7 @@ Required Permissions: MANAGE_GUILD (1 << 5)
 Checks (if any): 
 */
 export const data = new SlashCommandBuilder()
-  .setName('settings-revamp') // Sets the name
+  .setName('settings') // Sets the name
   .setDescription(
     'Reads the Config file for the current guild and updates a given setting with the specified value.',
   ); // Sets the description
@@ -23,7 +23,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     });
     const selectMenuRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents([
       new StringSelectMenuBuilder()
-        .setCustomId('settings_configType')
+        .setCustomId('settings_type')
         .setPlaceholder('Select the type of settings you want to change.')
         .addOptions([
           {
@@ -44,10 +44,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         .setStyle(ButtonStyle.Danger)
         .setLabel('Exit'),
     );
-    return await interaction.editReply({
+    await interaction.editReply({
       content: 'Please select the type of settings you want to view / update.',
       components: [selectMenuRow, ButtonRow],
     });
+    return console.log('/settings initalized.');
   } catch (err) {
     const errObject = new ErrorHandler(err, 'config');
     if (errObject.code !== 'Unhandled') {

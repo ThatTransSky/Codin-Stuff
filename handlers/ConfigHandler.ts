@@ -1,6 +1,7 @@
-import { Guild, User } from 'discord.js';
+import { Collection, Guild, User } from 'discord.js';
 import * as fs from 'fs';
 import stringify from 'json-stringify-pretty-compact';
+import { Setting } from '../classes/setting.js';
 import { ConfigErrorHandler } from './ConfigErrorHandler.js';
 
 /**
@@ -12,21 +13,19 @@ import { ConfigErrorHandler } from './ConfigErrorHandler.js';
  * @property {Guild | User} [UIDObject] - The Object of either a guild or a user.
  * @property {Snowflake} [id] - The ID of said Object.
  * @property {Object} [settings] - The contents of the config file in an Object form.
- * @property {String} [configType] - Whether the config is of a guild's or a user's.
  *
  */
 
 export class Config {
+  public UIDObject: Guild | User;
+  private id: string;
+  private settings: Collection<string, Setting>;
   /**
    * ConfigHandler Constructor
    * @constructor
-   * @param {String} configType - The type of config (Personal / Guild) that the instance is referring to.
    * @param {Guild | User} UIDObject - The interaction's current user's / guild's Object.
    *
    */
-  public UIDObject: Guild | User;
-  private id: string;
-  private settings: JSON;
   constructor(UIDObject: Guild | User) {
     this.UIDObject = UIDObject;
     if (UIDObject instanceof Guild) {
@@ -39,7 +38,8 @@ export class Config {
       }
       try {
         const settings = JSON.parse(fs.readFileSync(`./configs/${this.id}_config.json`).toString());
-        this.settings = settings;
+        const settingsCollection = this.convertToCollection(settings);
+        this.settings = settingsCollection;
       } catch (err) {
         if (err.code === `ENOENT`) {
           console.log(`The guild config for ${this.id} is missing. Creating...`);
@@ -60,7 +60,8 @@ export class Config {
         const settings = JSON.parse(
           fs.readFileSync(`./configs/personal_configs/${this.id}_config.json`).toString(),
         );
-        this.settings = settings;
+        const settingsCollection = this.convertToCollection(settings);
+        this.settings = settingsCollection;
       } catch (err) {
         if (err.code === `ENOENT`) {
           console.log(`The user config for ${this.id} is missing. Creating...`);
@@ -84,26 +85,28 @@ export class Config {
    *
    * @private
    *
-   * @returns {JSON} The default settings in an Object form.
+   * @returns {Collection<string, Setting>} The default settings in a Collection.
    */
 
-  private createMissingConfigFile(): JSON {
+  private createMissingConfigFile(): Collection<string, Setting> {
     if (this.UIDObject instanceof Guild) {
       const defaultSettings = JSON.parse(fs.readFileSync(`./configs/default.json`).toString());
+      const defaultSettingsCollection = this.convertToCollection(defaultSettings);
       fs.writeFileSync(
         `./configs/${this.id}_config.json`,
-        stringify(defaultSettings, { maxLength: 0 }),
+        stringify(defaultSettingsCollection, { maxLength: 0 }),
       );
-      return defaultSettings;
+      return defaultSettingsCollection;
     } else if (this.UIDObject instanceof User) {
       const defaultSettings = JSON.parse(
         fs.readFileSync(`./configs/personal_configs/default.json`).toString(),
       );
+      const defaultSettingsCollection = this.convertToCollection(defaultSettings);
       fs.writeFileSync(
         `./configs/personal_configs/${this.id}_config.json`,
         stringify(defaultSettings, { maxLength: 0 }),
       );
-      return defaultSettings;
+      return defaultSettingsCollection;
     } else {
       throw new ConfigErrorHandler(
         'this.UIDObject is neither a Guild or a User.',
@@ -112,8 +115,20 @@ export class Config {
     }
   }
 
+  private convertToCollection(settings: any[]): Collection<string, Setting> {
+    let settingsCollection = new Collection<string, Setting>();
+    settings.forEach((setting) => {
+      console.log(`${setting.name}, ${setting.value}, ${setting.category}`);
+      settingsCollection.set(setting.name as string, {
+        name: setting.name as string,
+        value: setting.value as string | number | boolean | any[],
+        category: setting.category as string,
+      });
+    });
+    console.log(settingsCollection);
+    return settingsCollection;
+  }
   /**
-   * updateGuildInfo():
    * Used to update the Guild's Info section in the config
    * with the guild's current information.
    */
@@ -132,17 +147,31 @@ export class Config {
       };
       count++;
     });
-    this.settings['guild_info'] = {
-      ...this.settings['guild_info'],
-      name: this.UIDObject.name,
-      id: this.UIDObject.id,
-      owner_id: this.UIDObject.ownerId,
-      member_count: this.UIDObject.memberCount,
-    };
-
-    for (let i = 0; i < administratorsObject.length; i++) {
-      this.settings['guild_info']['administrators'][i] = administratorsObject[i];
-    }
+    this.settings.set('guild_name', {
+      name: 'guild_name',
+      value: this.UIDObject.name,
+      category: 'info',
+    });
+    this.settings.set('guild_id', {
+      name: 'guild_id',
+      value: this.UIDObject.id,
+      category: 'info',
+    });
+    this.settings.set('owner_id', {
+      name: 'owner_id',
+      value: this.UIDObject.ownerId,
+      category: 'info',
+    });
+    this.settings.set('member_count', {
+      name: 'member_count',
+      value: this.UIDObject.memberCount,
+      category: 'info',
+    });
+    this.settings.set('administrators', {
+      name: 'administrators',
+      value: administratorsObject,
+      category: 'info',
+    });
     fs.writeFileSync(
       `./configs/${this.id}_config.json`,
       stringify(this.settings, {
@@ -163,12 +192,14 @@ export class Config {
   private refreshConfigFile() {
     if (this.UIDObject instanceof Guild) {
       const settings = JSON.parse(fs.readFileSync(`./configs/${this.id}_config.json`).toString());
-      this.settings = settings;
+      const settingsCollection = this.convertToCollection(settings);
+      this.settings = settingsCollection;
     } else if (this.UIDObject instanceof User) {
       const settings = JSON.parse(
         fs.readFileSync(`./configs/personal_configs/${this.id}_config.json`).toString(),
       );
-      this.settings = settings;
+      const settingsCollection = this.convertToCollection(settings);
+      this.settings = settingsCollection;
     } else {
       throw new ConfigErrorHandler(
         'this.UIDObject is neither a Guild or a User.',
@@ -180,9 +211,9 @@ export class Config {
   /**
    * updateSettings(): Used to update the settings within the guild's config.
    *
-   * @param {String} [settingName] The setting's name.
-   * @param {String} [settingCategory] The category the setting's under.
-   * @param {String | Boolean} [updatedValue] The updated value.
+   * @param {string} [settingName] The setting's name.
+   * @param {string} [settingCategory] The category the setting's under.
+   * @param {string | boolean} [updatedValue] The updated value.
    */
 
   public updateSetting(
@@ -192,31 +223,18 @@ export class Config {
   ) {
     this.refreshConfigFile();
     if (this.doesSettingExist(settingName, settingCategory)) {
-      if (this.settings[settingCategory][settingName] !== updatedValue) {
-        this.settings[settingCategory][settingName] = updatedValue;
-        if (this.UIDObject instanceof Guild) {
-          fs.writeFileSync(
-            `./configs/${this.id}_config.json`,
-            stringify(this.settings, { maxLength: 0 }),
-          );
-        } else if (this.UIDObject instanceof User) {
-          fs.writeFileSync(
-            `./configs/personal_configs/${this.id}_config.json`,
-            stringify(this.settings, { maxLength: 0 }),
-          );
-        } else {
-          throw new ConfigErrorHandler(
-            'this.UIDObject is neither a Guild or a User.',
-            'MissingParameters',
-          );
-        }
-        console.log(`The setting ${settingName} was accessed and updated to ${updatedValue}.`);
-      } else {
-        throw new ConfigErrorHandler(
-          'The updated value is identical to the current value.',
-          'NoChangesMade',
-        );
-      }
+      let mappedSettings = this.settings.mapValues((setting) => {
+        if (setting.category === settingCategory) return setting;
+      });
+      console.log(mappedSettings);
+
+      // console.log(`The setting ${settingName} was accessed and updated to ${updatedValue}.`);
+      // } else {
+      //   throw new ConfigErrorHandler(
+      //     'The updated value is identical to the current value.',
+      //     'NoChangesMade',
+      //   );
+      // }
     } else
       throw new ConfigErrorHandler('The specified setting does not exist.', 'InvalidSettingName');
   }
@@ -224,13 +242,16 @@ export class Config {
   /**
    * getSetting(): Returns the provided setting's value.
    *
-   * @param {String} [settingName] The setting's name that you're looking for.
-   * @param {String} [settingCategory] The setting's category that it's under.
+   * @param {string} [settingName] The setting's name that you're looking for.
+   * @param {string} [settingCategory] The setting's category that it's under.
    *
-   * @returns {String | Boolean} The setting's current value.
+   * @returns {string | boolean} The setting's current value.
    */
 
-  public getSetting(settingName: string, settingCategory: string): string | boolean | number {
+  public getSetting(
+    settingName: string,
+    settingCategory: string,
+  ): string | boolean | number | any[] {
     this.refreshConfigFile();
     if (this.doesSettingExist(settingName, settingCategory)) {
       console.log(`The setting ${settingName} was accessed.`);
@@ -247,14 +268,33 @@ export class Config {
    * doesSettingExist(): Checks whether a provided setting exists.
    * Pretty useless for the end user but good for debugging my stupid mistakes :>
    *
-   * @param {String} [settingName] The setting's name.
-   * @param {String} [settingCategory] The category that the setting is supposed to be under
-   * @return {Boolean} Whether the setting exists or not.
+   * @param {string} [settingName] The setting's name.
+   * @param {string} [settingCategory] The category that the setting is supposed to be under
+   * @return {boolean} Whether the setting exists or not.
    */
 
   public doesSettingExist(settingName: string, settingCategory: string): boolean {
     this.refreshConfigFile();
     return this.settings[settingCategory][settingName] !== undefined;
+  }
+
+  // public settingsToArray(settingCategory: string): any[] {
+  //   this.refreshConfigFile();
+  //   if (this.UIDObject instanceof Guild) {
+  //   } else if (this.UIDObject instanceof User) {
+  //   } else {
+  //     throw new ConfigErrorHandler(
+  //       'this.UIDObject is neither a Guild or a User.',
+  //       'MissingParameters',
+  //     );
+  //   }
+  // }
+
+  public toCollection(): Collection<string, any> {
+    this.refreshConfigFile();
+    let collection = new Collection<string, any>();
+
+    return collection;
   }
 
   public toString(): string {

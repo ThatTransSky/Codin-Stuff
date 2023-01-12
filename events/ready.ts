@@ -1,7 +1,6 @@
 import { REST } from '@discordjs/rest'; // Required to communicate via HTTPS
 import { Routes } from 'discord-api-types/v9'; //Required to communicate with Discord's API V9
-import { Client, Collection } from 'discord.js';
-import { CommandStructure } from '../classes/CommandStructure';
+import { Client, Collection, SlashCommandBuilder } from 'discord.js';
 import { Config } from '../handlers/ConfigHandler.js';
 // const { Collection } = require("discord.js")
 import { config } from 'dotenv';
@@ -18,7 +17,10 @@ Event Results: Registers all global (none at the moment) and per-guild commands.
 
 export const name = 'ready',
   once = true;
-export async function execute(client: Client, commands: Collection<string, CommandStructure>) {
+export async function execute(
+  client: Client,
+  commands: Collection<string, { data: SlashCommandBuilder; execute: Function }>,
+) {
   //When bot loads
   console.log(`Logged in as ${client.user.tag}!`);
 
@@ -26,7 +28,6 @@ export async function execute(client: Client, commands: Collection<string, Comma
   const guilds = await client.guilds.fetch();
   guilds.forEach(async (guild) => {
     const fetchedGuild = await guild.fetch();
-    // console.log(fetchedGuild);
     const config = new Config(fetchedGuild);
     await config.updateGuildInfo();
     console.log(`\nSuccessfully updated ${fetchedGuild.id}'s config with current info.\n`);
