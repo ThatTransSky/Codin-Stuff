@@ -1,6 +1,10 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
 import { ErrorHandler } from '../handlers/ErrorHandler.js';
-import { ChannelType, ChatInputCommandInteraction, GuildBasedChannel } from 'discord.js';
+import {
+  ChannelType,
+  ChatInputCommandInteraction,
+  GuildBasedChannel,
+  SlashCommandBuilder,
+} from 'discord.js';
 
 /*
 Command Name: "clear"

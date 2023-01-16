@@ -1,5 +1,4 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 /*
 Command Name: "ping"
 Command Purpose: Checks that the bot is alive and well.

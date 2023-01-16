@@ -1,6 +1,5 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
 import { ErrorHandler } from '../handlers/ErrorHandler.js';
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 /*
 Command Name: "unban"
 Command Purpose: Removes a ban.

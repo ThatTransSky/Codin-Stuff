@@ -106,7 +106,7 @@ export class ErrorHandler {
     } else if (this.code === 'NoChangesMade') {
       if (configRequiredActions.includes(this.action)) this.shouldExit = true;
       return;
-    } else if (this.code === 'MissingParameters') {
+    } else if (this.code === 'MissingOrInvalidParameters') {
       if (configRequiredActions.includes(this.action)) this.shouldExit = true;
       return;
     }

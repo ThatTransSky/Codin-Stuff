@@ -13,9 +13,7 @@ let client = new Client({
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.MessageContent,
   ],
-  // partials: [
-  //   Partials.Message
-  // ]
+  partials: [Partials.Message],
   // botGuilds: [process.env.GUILD_ID as string]
 });
 config();

@@ -1,8 +1,6 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { EmbedBuilder } from 'discord.js';
 import { Config } from '../handlers/ConfigHandler.js';
 import { ErrorHandler } from '../handlers/ErrorHandler.js';
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 /*
 Command Name: "bulk-unban"
 Command Purpose: Removes a bulk of bans.
@@ -24,7 +22,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
   try {
     const config = new Config(interaction.guild);
-    const isEphemeral = config.getSetting('ban', 'ephemeral');
+    const isEphemeral = config.getSetting('ban');
     await interaction.deferReply({
       ephemeral: isEphemeral as boolean,
     });

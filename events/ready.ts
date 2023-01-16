@@ -1,6 +1,4 @@
-import { REST } from '@discordjs/rest'; // Required to communicate via HTTPS
-import { Routes } from 'discord-api-types/v9'; //Required to communicate with Discord's API V9
-import { Client, Collection, SlashCommandBuilder } from 'discord.js';
+import { Client, Collection, SlashCommandBuilder, REST, Routes, ActivityType } from 'discord.js';
 import { Config } from '../handlers/ConfigHandler.js';
 // const { Collection } = require("discord.js")
 import { config } from 'dotenv';
@@ -23,7 +21,6 @@ export async function execute(
 ) {
   //When bot loads
   console.log(`Logged in as ${client.user.tag}!`);
-
   const client_id = client.user.id;
   const guilds = await client.guilds.fetch();
   guilds.forEach(async (guild) => {

@@ -1,7 +1,6 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
 import { Config } from '../handlers/ConfigHandler.js';
 import { ErrorHandler } from '../handlers/ErrorHandler.js';
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 /*
 Command Name: "untimeout"
 Command Purpose: Removes a user's timeout.
@@ -26,7 +25,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
   try {
     const config = new Config(interaction.guild);
-    const isEphemeral = config.getSetting('timeout', 'ephemeral');
+    const isEphemeral = config.getSetting('timeout');
     await interaction.deferReply({
       ephemeral: isEphemeral as boolean,
     });

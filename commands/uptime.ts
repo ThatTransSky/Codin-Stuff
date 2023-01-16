@@ -1,5 +1,10 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { ChatInputCommandInteraction, italic, Message, time } from 'discord.js';
+import {
+  ChatInputCommandInteraction,
+  italic,
+  Message,
+  time,
+  SlashCommandBuilder,
+} from 'discord.js';
 /* 
 Command Name: "uptime"
 Command Purpose: Show the bot's current uptime.

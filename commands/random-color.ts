@@ -1,6 +1,5 @@
-import { SlashCommandBuilder, EmbedBuilder } from '@discordjs/builders';
 import { ErrorHandler } from '../handlers/ErrorHandler.js';
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 /*
 Command Name: "random-color"
 Command Purpose: Replys with a random color (in hex format).

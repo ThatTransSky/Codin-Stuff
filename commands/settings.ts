@@ -1,7 +1,12 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { StringSelectMenuBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import {
+  StringSelectMenuBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  SlashCommandBuilder,
+  ChatInputCommandInteraction,
+} from 'discord.js';
 import { ErrorHandler } from '../handlers/ErrorHandler.js';
-import { ChatInputCommandInteraction } from 'discord.js';
 /*
 Command Name: "settings-revamp"
 Command Purpose: Reads the Config file for the current guild and updates a given setting with the specified value.
@@ -45,7 +50,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         .setLabel('Exit'),
     );
     await interaction.editReply({
-      content: 'Please select the type of settings you want to view / update.',
+      content: 'Please select the type of settings you want to view.',
       components: [selectMenuRow, ButtonRow],
     });
     return console.log('/settings initalized.');

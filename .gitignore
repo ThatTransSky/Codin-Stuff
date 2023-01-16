@@ -112,3 +112,12 @@ configs/personal_configs/*_config.json
 
 # Ignore this :)
 ideas.txt
+
+# dist project-specific ignores.
+dist/*.*
+dist/classes
+dist/commands
+dist/events
+dist/handlers
+dist/configs/*_config.json
+dist/configs/personal_configs/*_config.json
