@@ -7,7 +7,7 @@ export async function execute(rawDeletedMessage: Message) {
   try {
     const guild = rawDeletedMessage.guild;
     const config = new Config(guild);
-    const logChannelID = config.getSetting('logChannelID', 'general');
+    const logChannelID = config.getSetting('logChannelID');
     try {
       const loggingChannel = await guild.channels.fetch(logChannelID as string, { force: true });
       const deletedMessage = `\`\`\` ${rawDeletedMessage.content} \`\`\``;

@@ -1,8 +1,6 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
-import { EmbedBuilder } from 'discord.js';
 import { Config } from '../handlers/ConfigHandler.js';
 import { ErrorHandler } from '../handlers/ErrorHandler.js';
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 export const data = new SlashCommandBuilder()
   .setName('bulk-kick')
@@ -25,7 +23,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
   try {
     const config = new Config(interaction.guild);
-    const isEphemeral = config.getSetting('kick', 'ephemeral');
+    const isEphemeral = config.getSetting('kick');
     await interaction.deferReply({
       ephemeral: isEphemeral as boolean,
     });

@@ -7,7 +7,7 @@ export async function execute(rawOldMsg: Message, rawNewMsg: Message) {
   try {
     const guild = rawOldMsg.guild;
     const config = new Config(guild);
-    const logChannelID = config.getSetting(`logChannelID`, 'general');
+    const logChannelID = config.getSetting(`logChannelID`);
     const loggingChannel = await guild.channels.fetch(logChannelID as string, {
       force: true,
     });

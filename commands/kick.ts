@@ -1,7 +1,6 @@
-import { SlashCommandBuilder } from '@discordjs/builders';
 import { Config } from '../handlers/ConfigHandler.js';
 import { ErrorHandler } from '../handlers/ErrorHandler.js';
-import { ChatInputCommandInteraction } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 /*
 Command Name: "kick"
 Command Purpose: Like Ban but temporary :P
@@ -30,7 +29,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   // Executes the command.
   try {
     const config = new Config(interaction.guild);
-    const isEphemeral = config.getSetting('kick', 'ephemeral');
+    const isEphemeral = config.getSetting('kick');
     await interaction.deferReply({
       ephemeral: isEphemeral as boolean,
     });

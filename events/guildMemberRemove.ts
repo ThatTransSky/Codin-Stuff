@@ -8,13 +8,8 @@ export async function execute(guildMember: GuildMember) {
     const { guild } = guildMember;
     const config = new Config(guild);
     console.log(`${guildMember.user.tag} has left the '${guildMember.guild.name}' server 😥`);
-    config.updateSetting('member_count', 'guild_info', guild.memberCount);
-    console.log(
-      `Member count successfully updated. Now at ${config.getSetting(
-        'member_count',
-        'guild_info',
-      )}`,
-    );
+    await config.updateSetting('member_count', guild.memberCount as number);
+    console.log(`Member count successfully updated. Now at ${config.getSetting('member_count')}`);
   } catch (err) {
     const errObject = new ErrorHandler(err, 'event');
     console.log(errObject.message);
