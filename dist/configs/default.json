@@ -1,18 +1,72 @@
-{
-  "general": {
-    "logChannelID": ""
+[
+  {
+    "name": "logChannelID",
+    "value": "",
+    "type": "string",
+    "category": "general",
+    "description": "The channel ID to use for the Logger feature."
   },
-  "ephemeral": {
-    "ban": true,
-    "kick": true,
-    "clear": true,
-    "timeout": true
+  {
+    "name": "ban",
+    "value": true,
+    "type": "boolean",
+    "category": "ephemeral",
+    "description": "Are /ban responses ephemeral'd?"
   },
-  "guild_info": {
-    "name": "",
-    "id": "",
-    "owner_id": "",
-    "member_count": "",
-    "administrators": []
+  {
+    "name": "kick",
+    "value": true,
+    "type": "boolean",
+    "category": "ephemeral",
+    "description": "Are /kick responses ephemeral'd?"
+  },
+  {
+    "name": "clear",
+    "value": true,
+    "type": "boolean",
+    "category": "ephemeral",
+    "description": "Are /clear responses ephemeral'd?"
+  },
+  {
+    "name": "timeout",
+    "value": true,
+    "type": "boolean",
+    "category": "ephemeral",
+    "description": "Are /timeout responses ephemeral'd?"
+  },
+  {
+    "name": "guild_name",
+    "value": "",
+    "type": "string",
+    "category": "info",
+    "description": "The server's name."
+  },
+  {
+    "name": "guild_id",
+    "value": "",
+    "type": "string",
+    "category": "info",
+    "description": "The server's ID."
+  },
+  {
+    "name": "owner_id",
+    "value": "",
+    "type": "string",
+    "category": "info",
+    "description": "The owner's user ID."
+  },
+  {
+    "name": "member_count",
+    "value": 0,
+    "type": "number",
+    "category": "info",
+    "description": "The number of members that the server has."
+  },
+  {
+    "name": "administrators",
+    "value": [],
+    "type": "Array",
+    "category": "info",
+    "description": "A list of administrators within the server."
   }
-}
+]

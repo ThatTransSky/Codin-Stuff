@@ -7,8 +7,8 @@
     "importHelpers": true, // required
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "Node", // required
-    "esModuleInterop": true, // required
-    "preserveWatchOutput": true
+    "esModuleInterop": true // required
+    // "preserveWatchOutput": true
   },
   "exclude": ["node_modules"]
 }

@@ -1,5 +1,9 @@
-{
-  "general": {
-    "weather_location": ""
+[
+  {
+    "name": "test",
+    "value": "",
+    "type": "string",
+    "category": "general",
+    "description": "loser L"
   }
-}
+]
